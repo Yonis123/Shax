@@ -1,167 +1,244 @@
+/* General Styles */
 .app {
-    width: 100%;
-  
+  width: 100%;
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Border Image Styles */
+.bi-2, .bi-3, .bi-4 {
+  border: 2px solid transparent;
+  border-image: url("https://upload.wikimedia.org/wikipedia/commons/7/78/Aztec_calendar_%28bronze%29.svg") 100 repeat;
+}
+
+/* Board Styles */
+.board {
+  background-color: #FAFAFA; /* Very light grey background */
+  box-sizing: border-box;
+  width: 90vw; /* Use viewport width for responsiveness */
+  max-width: 500px;
+  height: 90vw; /* Maintain square aspect ratio */
+  max-height: 500px;
+  margin: 20px auto;
+  text-align: center;
+  position: relative;
+  border-radius: 15px; /* Slightly larger rounded corners */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Softer shadow for more depth */
+  border: 3px solid #DDD; /* Light grey border */
+}
+
+/* Quarter Styles */
+.quarter {
+  background-color: #FFF; /* Pure white background */
+  box-sizing: border-box;
+  display: inline-block;
+  width: 50%;
+  position: relative;
+  height: 0;
+  padding-bottom: 50%;
+  margin-bottom: -4px;
+  border: 2px solid #ECECEC; /* Lighter border */
+}
+
+/* Inner Board Styles */
+.inner1, .inner2 {
+  background-color: #FFF; /* Pure white background */
+  box-sizing: border-box;
+  position: absolute;
+  border: 2px solid #ECECEC; /* Lighter border */
+}
+
+.inner1 {
+  top: 16.66%;
+  right: 16.66%;
+  width: 66.66%;
+  height: 0;
+  padding-bottom: 66.66%;
+}
+
+.inner2 {
+  top: 33.33%;
+  right: 33.33%;
+  width: 33.33%;
+  height: 0;
+  padding-bottom: 33.33%;
+}
+
+/* Info Div Styles */
+.phase-div, .player-div, .info-div {
+  font-size: 1em;
+  font-weight: bold;
+  color: #333; /* Dark grey for better readability */
+  display: inline-block;
+  position: absolute;
+  left: 50%;
+  padding: 8px 16px;
+  transform: translateX(-50%);
+  background-color: #F0F0F0; /* Light grey background */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  border: 1px solid #DDD; /* Light grey border */
+}
+
+.phase-div {
+  bottom: -90px;
+  width: 180px;
+}
+
+.player-div {
+  bottom: -50px;
+  width: 100px;
+}
+
+.info-div {
+  top: -80px; /* Adjusted to add more space above the info-div */
+  width: 80vw; /* Responsive width */
+  max-width: 380px;
+  margin-top: 20px; /* Ensure this margin provides additional spacing */
+}
+
+/* Define the keyframes for the green border animation */
+@keyframes greenBorderAnimation {
+  0% {
+    border-color: green;
   }
-  
-  .bi-2 {
-    border: 2px;
-    border-image: url("https://upload.wikimedia.org/wikipedia/commons/7/78/Aztec_calendar_%28bronze%29.svg") 100 25 repeat;
+  50% {
+    border-color: transparent;
   }
-  
-  .bi-4 {
-    border: 3px;
-    border-image: url("https://upload.wikimedia.org/wikipedia/commons/7/78/Aztec_calendar_%28bronze%29.svg") 100 40 repeat;
+  100% {
+    border-color: green;
   }
-  
-  .bi-3 {
-    border: 3px;
-    border-image: url("https://upload.wikimedia.org/wikipedia/commons/7/78/Aztec_calendar_%28bronze%29.svg") 100 40 repeat;
-  }
-  
+}
+
+/* Node Styles */
+.node {
+  position: absolute;
+  z-index: 50;
+  border: 2px solid #FFD700; /* Default Golden border */
+  background-size: cover; /* Cover background image */
+  transform: translate(-50%, -50%);
+  border-radius: 50%; /* Circle shape */
+}
+
+/* Unclicked Node Styles */
+.unclicked-node {
+  animation: greenBorderAnimation 2s infinite; /* Apply animation */
+}
+
+/* Add hover effect for better interactivity */
+.node:hover {
+  border-color: #FFA500; /* Orange border on hover for better visibility */
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Lateral Info Styles */
+.lateral, .lateral2 {
+  font-size: 1em;
+  font-weight: bold;
+  color: #333; /* Dark grey for better readability */
+  display: inline-block;
+  position: absolute;
+  width: 25vw; /* Responsive width */
+  max-width: 100px;
+  padding: 8px 16px;
+  background-color: #F0F0F0; /* Light grey background */
+  border-radius: 10px;
+  border: 1px solid #DDD; /* Light grey border */
+  transform: translateY(-50%);
+}
+
+.lateral {
+  left: -150px;
+}
+
+.lateral2 {
+  right: -150px;
+}
+
+/* Player Color Styles */
+.white {
+  color: white;
+}
+
+.black {
+  color: black;
+}
+
+/* Line Styles */
+.line {
+  position: absolute;
+  background-color: #FFD700; /* Golden lines for a bright accent */
+}
+
+.horizontal-line {
+  height: 2px; /* Line thickness */
+  width: 33%; /* Adjust based on your layout */
+}
+
+.vertical-line {
+  width: 2px; /* Line thickness */
+  height: 33%; /* Adjust based on your layout */
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
   .board {
-    background-color: #EFEFA9;
-    box-sizing: border-box;
-    width: 400px;
-    height: 400px;
-    margin: 60px auto 0 auto;
-    text-align: center;
-    position: relative;
-  }
-  
-  .quarter {
-    background-color: #EFEFA9;
-    box-sizing: border-box;
-    display: inline-block;
-    width: 50%;
-    position: relative;
-    height: 0;
-    padding-bottom: 50%;
-    margin-bottom: -4px;
-    border: solid black 1px
-  }
-  
-  .inner1 {
-    top: 16.66%;
-    right: 16.66%;
-    box-sizing: border-box;
-    width: 66.66%;
-    position: absolute;
-    height: 0;
-    padding-bottom: 66.66%;
-    border: solid black 1px;
-  }
-  
-  .inner2 {
-    background-color: #EFEFA9;
-    top: 33.33%;
-    right: 33.33%;
-    box-sizing: border-box;
-    width: 33.33%;
-    position: absolute;
-    height: 0;
-    padding-bottom: 33.33%;
-    border: solid black 1px;
-  }
-  
-  .phase-div {
-    font-size: 1em;
-    font-weight: bolder;
-    color: #94551F;
-    display: inline-block;
-    position: absolute;
-    width: 150px;
-    bottom: -90px;
-    left: 50%;
-    padding: 5px 10px;
-    transform: translateX(-50%);
-    background-color: #dFdF99;
-  }
-  
-  .player-div {
-    font-size: 1em;
-    font-weight: bolder;
-    color: #94551F;
-    display: inline-block;
-    position: absolute;
-    bottom: -50px;
-    left: 50%;
-    width: 80px;
-    padding: 5px 10px;
-    transform: translateX(-50%);
-    background-color: #dFdF99;
+    width: 90vw;
+    height: 90vw;
   }
   
   .info-div {
-    font-size: 0.75em;
-    font-weight: bolder;
-    color: #94551F;
-    display: inline-block;
-    position: absolute;
-    top: -50px;
-    left: 50%;
-    width: 350px;
-    padding: 5px 10px;
-    transform: translateX(-50%);
-    background-color: #dFdF99;
-  }
-  
-  .node {
-    position: absolute;
-    z-index: 50;
-    border: 1px solid #94551F;
-    background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/78/Aztec_calendar_%28bronze%29.svg");
-    background-size: contain;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-  }
-  
-  .lateral{
-    font-size: 1em;
-    font-weight: bolder;
-    color: #94551F;
-    display: inline-block;
-    position: absolute;;
-    left: -135px;
-    width: 90px;
-    padding: 5px 10px;
-    background-color: #dFdF99;
-    transform: translateY(-50%);
-  }
-  
-  .lateral2 {
-    font-size: 1em;
-    font-weight: bolder;
-    color: #94551F;
-    display: inline-block;
-    position: absolute;
-    right: -135px;
-    width: 90px;
-    padding: 5px 10px;
-    background-color: #dFdF99;
-    transform: translateY(-50%);
-  }
-  
-  .white{
-    color: white;
-  }
-  
-  .black{
-    color: black;
+    width: 90vw;
   }
 
+  .phase-div, .player-div, .info-div {
+    font-size: 0.9em;
+    padding: 6px 12px;
+  }
 
-  /* lines */
-  .line {
-    position: absolute;
-    background-color: #050403; /* Match the color to your design */
+  .phase-div {
+    bottom: -70px;
+  }
+
+  .player-div {
+    bottom: -40px;
+  }
+
+  .lateral, .lateral2 {
+    width: 30vw;
+    font-size: 0.9em;
+  }
+}
+
+@media (max-width: 480px) {
+  .board {
+    width: 95vw;
+    height: 95vw;
   }
   
-  .horizontal-line {
-    height: 2px; /* Line thickness */
-    width: 33%; /* Adjust based on your layout */
+  .info-div {
+    width: 95vw;
   }
-  
-  .vertical-line {
-    width: 2px; /* Line thickness */
-    height: 33%; /* Adjust based on your layout */
+
+  .phase-div, .player-div, .info-div {
+    font-size: 0.8em;
+    padding: 4px 10px;
   }
+
+  .phase-div {
+    bottom: -60px;
+  }
+
+  .player-div {
+    bottom: -30px;
+  }
+
+  .lateral, .lateral2 {
+    width: 35vw;
+    font-size: 0.8em;
+  }
+}

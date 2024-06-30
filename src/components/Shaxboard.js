@@ -78,6 +78,7 @@ class Shaxboard extends React.Component{
           }
         }
       }
+
     
       playerMove(node) {
         if (this.state.removingPhase) {
@@ -127,27 +128,34 @@ class Shaxboard extends React.Component{
           } else {this.state.info="Second game phase not yet implemented";}
         }
       }
+      getUnclickedNodes() {
+        return this.state.board.filter(node => node.controllingPlayer === 0);
+      }
     
       render() {
-    
         let quarters = [];
-        for (let i=0; i<4; i++) {
-          let quarter = <div className="quarter bi-2" key={i}/>
-          quarters.push(quarter)
+        for (let i = 0; i < 4; i++) {
+          let quarter = <div className="quarter bi-2" key={i} />;
+          quarters.push(quarter);
         }
         let nodes = [];
-        for (let i=0; i<24; i++) {
+        for (let i = 0; i < 24; i++) {
           const pos = this.state.board[i].position;
           const player = this.state.board[i].controllingPlayer;
-          let node = <Node
-            nodeNumber={i}
-            key={'cell'+i}
-            controllingPlayer={player}
-            position={pos}
-            nodeIsClicked={this.playerMove.bind(this)}
-          />
-          nodes.push(node)
+          const additionalClass = player === 0 ? 'unclicked-node' : '';
+          let node = (
+            <Node
+              nodeNumber={i}
+              key={'cell' + i}
+              controllingPlayer={player}
+              position={pos}
+              nodeIsClicked={this.playerMove.bind(this)}
+              className={additionalClass}
+            />
+          );
+          nodes.push(node);
         }
+    
     
         return (
           <div className="board bi-2">
@@ -158,8 +166,8 @@ class Shaxboard extends React.Component{
             {quarters}
             <div className="inner1 bi-4"/>
             <div className="inner2 bi-4"/>
-            <div className="lateral bi-3"><span className="white">Player 1 Pieces left: {this.state.player1Nodes}</span></div>
-            <div className="lateral2 bi-3"><span className="black">Player 2 Pieces left: {this.state.player2Nodes}</span></div>
+            {/* <div className="lateral bi-3"><span className="white">Player 1 Pieces left: {this.state.player1Nodes}</span></div>
+            <div className="lateral2 bi-3"><span className="black">Player 2 Pieces left: {this.state.player2Nodes}</span></div> */}
           </div>
         );
       }
