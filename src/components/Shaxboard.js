@@ -11,7 +11,7 @@ class Shaxboard extends React.Component{
         }
         this.state = {
           board: board,
-          info: "Select a position for placement.",
+          info: "Player 1's turn to place a piece.",
           gamePhase: "I",
           removingPhase: false,
           player1Moves: 0,
@@ -89,14 +89,14 @@ class Shaxboard extends React.Component{
               this.state.player2Nodes--;
             }
             this.state.board[node].controllingPlayer = 0;
-            this.state.removingPhase=false;
-            this.state.currentPlayer=this.getNextPlayer(this.state.currentPlayer);
-            this.state.info="Select a position for placement.";
+            this.state.removingPhase = false;
+            this.state.currentPlayer = this.getNextPlayer(this.state.currentPlayer);
+            this.setState({ info: `Player ${this.state.currentPlayer}'s turn to place a piece.` }); // Update info for the next player
             this.forceUpdate();
           } else {
             const info = this.state.info;
-            this.setState({info:"Invalid selection!"});
-            setTimeout(function() {this.setState({info:info})}.bind(this), 1500);
+            this.setState({ info: "Invalid selection!" });
+            setTimeout(function() { this.setState({ info: info }) }.bind(this), 1500);
           }
         } else if (!(this.state.removingPhase)) {
           if (this.state.gamePhase === "I") {
@@ -110,24 +110,28 @@ class Shaxboard extends React.Component{
                 this.state.player2Moves++;
               }
               if (this.millIsFormed(node)) {
-                this.state.info="A mill was formed! Remove an opponent piece from the board.";
-                this.state.removingPhase=true;
-                this.forceUpdate();
-              } else if (!(this.millIsFormed(node))) {
-                this.state.currentPlayer=this.getNextPlayer(this.state.currentPlayer);
-                this.forceUpdate();
+                this.setState({ info: "A mill was formed! Remove an opponent piece from the board." });
+                this.state.removingPhase = true;
+              } else {
+                this.state.currentPlayer = this.getNextPlayer(this.state.currentPlayer);
+                if (this.state.player2Moves === 9) {
+                  this.setState({ gamePhase: "II", info: "Game Phase II: Start moving pieces." });
+                } else {
+                  this.setState({ info: `Player ${this.state.currentPlayer}'s turn to place a piece.` }); // Update info for the next player
+                }
               }
-              if (this.state.player2Moves === 9) {
-                this.state.gamePhase="II";
-              }
+              this.forceUpdate();
             } else {
               const info = this.state.info;
-              this.setState({info:"Invalid placement!"});
-              setTimeout(function() {this.setState({info:info})}.bind(this), 1500);
+              this.setState({ info: "Invalid placement!" });
+              setTimeout(function() { this.setState({ info: info }) }.bind(this), 1500);
             }
-          } else {this.state.info="Second game phase not yet implemented";}
+          } else {
+            this.setState({ info: "Second game phase not yet implemented" });
+          }
         }
       }
+      
       getUnclickedNodes() {
         return this.state.board.filter(node => node.controllingPlayer === 0);
       }
@@ -158,16 +162,19 @@ class Shaxboard extends React.Component{
     
     
         return (
-          <div className="board bi-2">
-            {nodes}
-            <div className="phase-div bi-3">Game Phase: <span className="black">{this.state.gamePhase}</span></div>
-            <div className="player-div bi-3"> Player <span className="black">{this.state.currentPlayer}</span></div>
-            <div className="info-div bi-3">{this.state.info}</div>
-            {quarters}
-            <div className="inner1 bi-4"/>
-            <div className="inner2 bi-4"/>
-            {/* <div className="lateral bi-3"><span className="white">Player 1 Pieces left: {this.state.player1Nodes}</span></div>
-            <div className="lateral2 bi-3"><span className="black">Player 2 Pieces left: {this.state.player2Nodes}</span></div> */}
+          <div className="app">
+            
+            <div className="board bi-2">
+              {nodes}
+              {/* <div className="phase-div bi-3">Game Phase: <span className="black">{this.state.gamePhase}</span></div>
+              <div className="player-div bi-3"> Player <span className="black">{this.state.currentPlayer}</span></div> */}
+              <div className="info-div bi-3">{this.state.info}</div>
+              {quarters}
+              <div className="inner1 bi-4"/>
+              <div className="inner2 bi-4"/>
+              {/* <div className="lateral bi-3"><span className="white">Player 1 Pieces left: {this.state.player1Nodes}</span></div>
+              <div className="lateral2 bi-3"><span className="black">Player 2 Pieces left: {this.state.player2Nodes}</span></div> */}
+            </div>
           </div>
         );
       }

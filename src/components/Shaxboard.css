@@ -1,3 +1,16 @@
+/* Shake Animation */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+/* Info Div Styles with Shake Animation */
+.shake {
+  animation: shake 0.5s;
+}
 /* General Styles */
 .app {
   width: 100%;
@@ -9,11 +22,20 @@
   align-items: center;
 }
 
+/* Title Styles */
+.title {
+  font-size: 2em;
+  font-weight: bold;
+  margin-bottom: 20px; /* Add margin-bottom to create space between the title and the board */
+  text-align: center;
+}
+
 /* Border Image Styles */
 .bi-2, .bi-3, .bi-4 {
   border: 2px solid transparent;
   border-image: url("https://upload.wikimedia.org/wikipedia/commons/7/78/Aztec_calendar_%28bronze%29.svg") 100 repeat;
 }
+
 
 /* Board Styles */
 .board {
@@ -23,12 +45,12 @@
   max-width: 500px;
   height: 90vw; /* Maintain square aspect ratio */
   max-height: 500px;
-  margin: 20px auto;
+  margin: 10% auto; /* Increase the margin-top to move the board downwards */
   text-align: center;
   position: relative;
   border-radius: 15px; /* Slightly larger rounded corners */
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Softer shadow for more depth */
-  border: 3px solid #DDD; /* Light grey border */
+  border: 1px solid #DDD; /* Light grey border */
 }
 
 /* Quarter Styles */
@@ -58,6 +80,28 @@
   width: 66.66%;
   height: 0;
   padding-bottom: 66.66%;
+
+}
+/* creates that one inner line I have been missing */
+.inner1::after {
+  content: '';
+  position: absolute;
+  top: 50%; /* Position at the middle vertically */
+  left: 50%; /* Position at the middle horizontally */
+  width: 2px; /* Line thickness for vertical line */
+  height: 100%; /* Full height */
+  background-color: #ECECEC; /* Line color */
+  transform: translate(-50%, -50%); /* Center the line */
+}
+.inner1::before {
+  content: '';
+  position: absolute;
+  top: 50%; /* Position at the middle vertically */
+  left: 50%; /* Position at the middle horizontally */
+  width: 100%; /* Full width for horizontal line */
+  height: 2px; /* Line thickness */
+  background-color: #ECECEC; /* Line color */
+  transform: translate(-50%, -50%); /* Center the line */
 }
 
 .inner2 {
