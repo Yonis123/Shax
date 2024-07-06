@@ -18,7 +18,8 @@ class Shaxboard extends React.Component{
           player2Moves: 0,
           player1Nodes: 0,
           player2Nodes: 0,
-          currentPlayer: 1
+          currentPlayer: 1,
+          firstMillPlayer: null
         }
       }
     
@@ -110,11 +111,13 @@ class Shaxboard extends React.Component{
                 this.state.player2Moves++;
               }
               if (this.millIsFormed(node)) {
-                this.setState({ info: "A mill was formed! Remove an opponent piece from the board." });
+                this.setState({ info: `Jare!` });
+                this.state.firstMillPlayer = this.state.currentPlayer
+    
                 this.state.removingPhase = true;
               } else {
                 this.state.currentPlayer = this.getNextPlayer(this.state.currentPlayer);
-                if (this.state.player2Moves === 9) {
+                if (this.state.player2Moves === 12) {
                   this.setState({ gamePhase: "II", info: "Game Phase II: Start moving pieces." });
                 } else {
                   this.setState({ info: `Player ${this.state.currentPlayer}'s turn to place a piece.` }); // Update info for the next player
