@@ -1,38 +1,35 @@
 import React from 'react';
 
 class Node extends React.Component {
-  onNodeClick() {
+  // Use class properties to avoid binding in render
+  onNodeClick = () => {
     this.props.nodeIsClicked(this.props.nodeNumber);
   }
 
   render() {
     const { position, controllingPlayer, className } = this.props;
-    let playerStyle = {};
+    const playerStyles = [
+      { width: 20, height: 20, bkg: "#D3D3D3" }, // Empty node
+      { width: 30, height: 30, bkg: "#CCEDEF" }, // Player 1
+      { width: 30, height: 30, bkg: "#2F4F4F" }  // Player 2
+    ];
     
-    if (controllingPlayer === 0) {
-      playerStyle.width = 20;
-      playerStyle.height = 20;
-      playerStyle.bkg = "#D3D3D3"; // Light Gray for empty nodes
-    } else if (controllingPlayer === 1) {
-      playerStyle.width = 30;
-      playerStyle.height = 30;
-      playerStyle.bkg = "#CCEDEF"; // Light Blue for Player 1
-    } else if (controllingPlayer === 2) {
-      playerStyle.width = 30;
-      playerStyle.height = 30;
-      playerStyle.bkg = "#2F4F4F"; // Dark Slate Gray for Player 2
-    }
+    const playerStyle = playerStyles[controllingPlayer] || playerStyles[0];
     
     const style = {
-      left: position.xPos + '%',
-      top: position.yPos + '%',
-      width: playerStyle.width + 'px',
-      height: playerStyle.height + 'px',
+      left: `${position.xPos}%`,
+      top: `${position.yPos}%`,
+      width: `${playerStyle.width}px`,
+      height: `${playerStyle.height}px`,
       backgroundColor: playerStyle.bkg,
     };
 
     return (
-      <div className={`node ${className}`} style={style} onClick={this.onNodeClick.bind(this)} />
+      <div 
+        className={`node ${className}`} 
+        style={style} 
+        onClick={this.onNodeClick} 
+      />
     );
   }
 }
