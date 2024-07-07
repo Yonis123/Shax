@@ -10,7 +10,7 @@ class Shaxboard extends React.Component {
     this.state = {
       board: this.initializeBoard(),
       info: "Player 1's turn to place a piece.",
-      gamePhase: "I", // "I" for initial placement, "II" for moving pieces
+      gamePhase: "I", // "I" for initial placement, "II" for removing pieces, "III" for moving pieces
       player1Moves: 0,
       player2Moves: 0,
       player1Nodes: 0,
@@ -19,6 +19,8 @@ class Shaxboard extends React.Component {
       firstMillPlayer: null,
       showPopup: false,
       popupMessage: '',
+      removePiece: false,
+      firstRemovalDone: false, // Track if the first removal in phase 2 is done
     };
   }
 
@@ -93,16 +95,58 @@ class Shaxboard extends React.Component {
 
   // Handle player move
   playerMove(node) {
-    const { board, currentPlayer, gamePhase } = this.state;
+    const { board, currentPlayer, gamePhase, removePiece, firstMillPlayer, firstRemovalDone } = this.state;
     
-    if (board[node].controllingPlayer === 0) {
+    if (removePiece) {
+      this.handleRemovePiece(node);
+    } else if (board[node].controllingPlayer === 0) {
       if (gamePhase === "I") {
         this.handlePhaseI(node);
-      } else {
+      } else if (gamePhase === "II") {
         this.setState({ info: "Second game phase not yet implemented" });
+      } else if (gamePhase === "III") {
+        this.setState({ info: "Third game phase not yet implemented" });
       }
     } else {
       this.showTemporaryInfo("Invalid placement!");
+    }
+  }
+
+  handleRemovePiece(node) {
+    const board = [...this.state.board];
+    const { firstMillPlayer, firstRemovalDone, currentPlayer } = this.state;
+    const opponentPlayer = this.getNextPlayer(currentPlayer);
+    const opponentPlayerKey = currentPlayer === 1 ? 'player2Nodes' : 'player1Nodes';
+
+    if (board[node].controllingPlayer !== 0 && board[node].controllingPlayer !== currentPlayer) {
+      board[node].controllingPlayer = 0;
+      this.setState(prevState => ({
+        board,
+        removePiece: false,
+        info: `Player ${firstMillPlayer}'s turn to move a piece.`,
+        [opponentPlayerKey]: prevState[opponentPlayerKey] - 1,
+        currentPlayer: firstMillPlayer,
+      }), () => {
+        if (!firstRemovalDone) {
+          // Allow the opponent to remove a piece
+          this.setState({
+            info: `Player ${opponentPlayer} removes an opponent's piece.`,
+            removePiece: true,
+            currentPlayer: opponentPlayer,
+            firstRemovalDone: true,
+          });
+        } else {
+          // Transition to phase III
+          this.setState({
+            gamePhase: "III",
+            info: `Game Phase III: Start moving pieces.`,
+            removePiece: false,
+            firstRemovalDone: false, // Reset for future removals
+          });
+        }
+      });
+    } else {
+      this.showTemporaryInfo("Invalid removal! You must remove an opponent's piece.");
     }
   }
 
@@ -138,11 +182,14 @@ class Shaxboard extends React.Component {
         });
       } else {
         const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-        if (this.state.player2Moves === 12) {
+        if (this.state.player2Moves + 1 === 13) {
           // Move to phase II if all pieces have been placed
+          const firstMillPlayer = this.state.firstMillPlayer || 2;
           this.setState({
             gamePhase: "II",
-            info: "Game Phase II: Start moving pieces.",
+            info: `Game Phase II: Player ${firstMillPlayer} removes an opponent's piece.`,
+            removePiece: true,
+            currentPlayer: firstMillPlayer,
           });
         } else {
           this.setState({
@@ -158,7 +205,7 @@ class Shaxboard extends React.Component {
   showTemporaryInfo(message) {
     const previousInfo = this.state.info;
     this.setState({ info: message });
-    setTimeout(() => this.setState({ info: previousInfo }), 5500);
+    setTimeout(() => this.setState({ info: previousInfo }), 1500);
   }
 
   // Calculate the position of a node on the board
@@ -173,9 +220,8 @@ class Shaxboard extends React.Component {
     ];
     return { xPos: positions[index][0], yPos: positions[index][1] };
   }
-
-  // Close the popup
-  closePopup = () => {
+   // Close the popup
+   closePopup = () => {
     this.setState({ showPopup: false, popupMessage: '' });
   }
 
