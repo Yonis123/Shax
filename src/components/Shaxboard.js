@@ -1,224 +1,221 @@
-import React from "react";
-import './Shaxboard.css'
+import React from 'react';
+import './Shaxboard.css';
 import Node from './Node.js';
+import Popup from './Popup';
 
-class Shaxboard extends React.Component{
-    constructor() {
-        super();
-        let board = [];
-        for (let i=0; i<24; i++) {
-          board.push({"position": getPosition(i), "controllingPlayer":0});
+class Shaxboard extends React.Component {
+  constructor() {
+    super();
+    // Initialize the state of the board and game variables
+    this.state = {
+      board: this.initializeBoard(),
+      info: "Player 1's turn to place a piece.",
+      gamePhase: "I", // "I" for initial placement, "II" for moving pieces
+      player1Moves: 0,
+      player2Moves: 0,
+      player1Nodes: 0,
+      player2Nodes: 0,
+      currentPlayer: 1,
+      firstMillPlayer: null,
+      showPopup: false,
+      popupMessage: '',
+    };
+  }
+
+  // Initialize the board with 24 positions
+  initializeBoard() {
+    const board = [];
+    for (let i = 0; i < 24; i++) {
+      board.push({ position: this.getPosition(i), controllingPlayer: 0 });
+    }
+    return board;
+  }
+
+  // Get the next player in turn
+  getNextPlayer(player) {
+    return player === 1 ? 2 : 1;
+  }
+
+  // Check if a mill (three pieces in a row) is formed
+  millIsFormed(index) {
+    const board = this.state.board;
+    const player = board[index].controllingPlayer;
+    const positionsToCheck = [
+      [2, 4, 10, 12, 18, 20], // Mid positions in a row
+      [0, 8, 16], // Left column positions
+      [6, 14, 22], // Right column positions
+    ];
+
+    // Check horizontal and vertical mills
+    if (index % 2 === 0) {
+      if (positionsToCheck[0].includes(index)) {
+        if ((board[index - 1]?.controllingPlayer === player && board[index - 2]?.controllingPlayer === player) ||
+            (board[index + 1]?.controllingPlayer === player && board[index + 2]?.controllingPlayer === player)) {
+          return true;
         }
-        this.state = {
-          board: board,
-          info: "Player 1's turn to place a piece.",
-          gamePhase: "I",
-          removingPhase: false,
-          player1Moves: 0,
-          player2Moves: 0,
-          player1Nodes: 0,
-          player2Nodes: 0,
-          currentPlayer: 1,
-          firstMillPlayer: null
+      } else if (positionsToCheck[1].includes(index)) {
+        if ((board[index + 1]?.controllingPlayer === player && board[index + 2]?.controllingPlayer === player) ||
+            (board[index + 6]?.controllingPlayer === player && board[index + 7]?.controllingPlayer === player)) {
+          return true;
+        }
+      } else if (positionsToCheck[2].includes(index)) {
+        if ((board[index - 1]?.controllingPlayer === player && board[index - 2]?.controllingPlayer === player) ||
+            (board[index + 1]?.controllingPlayer === player && board[index - 6]?.controllingPlayer === player)) {
+          return true;
         }
       }
+    } else {
+      if (![7, 15, 23].includes(index)) {
+        if (board[index - 1]?.controllingPlayer === player && board[index + 1]?.controllingPlayer === player) {
+          return true;
+        }
+      } else {
+        if (board[index - 1]?.controllingPlayer === player && board[index - 7]?.controllingPlayer === player) {
+          return true;
+        }
+      }
+      if (index <= 7) {
+        if (board[index + 8]?.controllingPlayer === player && board[index + 16]?.controllingPlayer === player) {
+          return true;
+        }
+      } else if (index > 7 && index <= 15) {
+        if (board[index - 8]?.controllingPlayer === player && board[index + 8]?.controllingPlayer === player) {
+          return true;
+        }
+      } else if (index > 15 && index <= 23) {
+        if (board[index - 8]?.controllingPlayer === player && board[index - 16]?.controllingPlayer === player) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // Handle player move
+  playerMove(node) {
+    const { board, currentPlayer, gamePhase } = this.state;
     
-      getNextPlayer(player) {
-        if (player === 1) {
-          return 2;
+    if (board[node].controllingPlayer === 0) {
+      if (gamePhase === "I") {
+        this.handlePhaseI(node);
+      } else {
+        this.setState({ info: "Second game phase not yet implemented" });
+      }
+    } else {
+      this.showTemporaryInfo("Invalid placement!");
+    }
+  }
+
+  // Handle the first phase of the game where players place their pieces
+  handlePhaseI(node) {
+    const board = [...this.state.board];
+    board[node].controllingPlayer = this.state.currentPlayer;
+    const playerKey = this.state.currentPlayer === 1 ? 'player1Nodes' : 'player2Nodes';
+    const moveKey = this.state.currentPlayer === 1 ? 'player1Moves' : 'player2Moves';
+
+    this.setState(prevState => ({
+      board,
+      [playerKey]: prevState[playerKey] + 1,
+      [moveKey]: prevState[moveKey] + 1,
+    }), () => {
+      if (this.millIsFormed(node)) {
+        const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
+        this.setState({
+          info: `Player ${this.state.currentPlayer} formed a mill!`,
+          firstMillPlayer: this.state.firstMillPlayer || this.state.currentPlayer, // Store the first mill player
+          showPopup: true,
+          popupMessage: 'Mill formed!',
+          currentPlayer: nextPlayer,
+        }, () => {
+          this.setState({
+            info: `Player ${nextPlayer}'s turn to place a piece.`,
+          });
+
+          // Hide the popup after 2 seconds
+          setTimeout(() => {
+            this.setState({ showPopup: false });
+          }, 2000);
+        });
+      } else {
+        const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
+        if (this.state.player2Moves === 12) {
+          // Move to phase II if all pieces have been placed
+          this.setState({
+            gamePhase: "II",
+            info: "Game Phase II: Start moving pieces.",
+          });
         } else {
-          return 1;
+          this.setState({
+            currentPlayer: nextPlayer,
+            info: `Player ${nextPlayer}'s turn to place a piece.`,
+          });
         }
       }
-    
-      millIsFormed(index) {
-        let board = this.state.board;
-        const player = board[index].controllingPlayer;
-        if ((index%2) == 0) {
-          if (index == 2 || index == 4 || index == 10 || index == 12 || index == 18 || index == 20) {
-            if ((board[index-1].controllingPlayer == player)&&(board[index-2].controllingPlayer == player)) {
-              return true;
-            } else if ((board[index+1].controllingPlayer == player)&&(board[index+2].controllingPlayer == player)) {
-              return true;
-            }
-          } else if (index == 0 || index == 8 || index == 16) {
-            if ((board[index+1].controllingPlayer == player)&&(board[index+2].controllingPlayer == player)) {
-              return true;
-            } else if ((board[index+6].controllingPlayer == player)&&(board[index+7].controllingPlayer == player)) {
-              return true;
-            }
-          } else if (index == 6 || index == 14 || index == 22) {
-            if ((board[index-1].controllingPlayer == player)&&(board[index-2].controllingPlayer == player)) {
-              return true;
-            } else if ((board[index+1].controllingPlayer == player)&&(board[index-6].controllingPlayer == player)) {
-              return true;
-            }
-          }
-        } else if ((index%2) == 1) {
-          if (index!=7 && index !=15 && index!=23) {
-            if ((board[index-1].controllingPlayer == player)&&(board[index+1].controllingPlayer == player)) {
-              return true;
-            }
-          } else {
-            if ((board[index-1].controllingPlayer == player)&&(board[index-7].controllingPlayer == player)) {
-              return true;
-            }
-          }
-          if (index<=7) {
-            if ((board[index+8].controllingPlayer == player)&&(board[index+16].controllingPlayer == player)) {
-              return true;
-            }
-          } else if (index>7 && index<=15) {
-            if ((board[index-8].controllingPlayer == player)&&(board[index+8].controllingPlayer == player)) {
-              return true;
-            }
-          } else if (index>15 && index<=23) {
-            if ((board[index-8].controllingPlayer == player)&&(board[index-16].controllingPlayer == player)) {
-              return true;
-            }
-          }
-        }
-      }
+    });
+  }
 
-    
-      playerMove(node) {
-        if (this.state.removingPhase) {
-          if (this.state.board[node].controllingPlayer !== 0 && this.state.board[node].controllingPlayer !== this.state.currentPlayer) {
-            if (this.state.board[node].controllingPlayer === 1) {
-              this.state.player1Nodes--;
-            } else if (this.state.board[node].controllingPlayer === 2) {
-              this.state.player2Nodes--;
-            }
-            this.state.board[node].controllingPlayer = 0;
-            this.state.removingPhase = false;
-            this.state.currentPlayer = this.getNextPlayer(this.state.currentPlayer);
-            this.setState({ info: `Player ${this.state.currentPlayer}'s turn to place a piece.` }); // Update info for the next player
-            this.forceUpdate();
-          } else {
-            const info = this.state.info;
-            this.setState({ info: "Invalid selection!" });
-            setTimeout(function() { this.setState({ info: info }) }.bind(this), 1500);
-          }
-        } else if (!(this.state.removingPhase)) {
-          if (this.state.gamePhase === "I") {
-            if (this.state.board[node].controllingPlayer === 0) {
-              this.state.board[node].controllingPlayer = this.state.currentPlayer;
-              if (this.state.currentPlayer === 1) {
-                this.state.player1Nodes++;
-                this.state.player1Moves++;
-              } else if (this.state.currentPlayer === 2) {
-                this.state.player2Nodes++;
-                this.state.player2Moves++;
-              }
-              if (this.millIsFormed(node)) {
-                this.setState({ info: `Jare!` });
-                this.state.firstMillPlayer = this.state.currentPlayer
-    
-                this.state.removingPhase = true;
-              } else {
-                this.state.currentPlayer = this.getNextPlayer(this.state.currentPlayer);
-                if (this.state.player2Moves === 12) {
-                  this.setState({ gamePhase: "II", info: "Game Phase II: Start moving pieces." });
-                } else {
-                  this.setState({ info: `Player ${this.state.currentPlayer}'s turn to place a piece.` }); // Update info for the next player
-                }
-              }
-              this.forceUpdate();
-            } else {
-              const info = this.state.info;
-              this.setState({ info: "Invalid placement!" });
-              setTimeout(function() { this.setState({ info: info }) }.bind(this), 1500);
-            }
-          } else {
-            this.setState({ info: "Second game phase not yet implemented" });
-          }
-        }
-      }
-      
-      getUnclickedNodes() {
-        return this.state.board.filter(node => node.controllingPlayer === 0);
-      }
-    
-      render() {
-        let quarters = [];
-        for (let i = 0; i < 4; i++) {
-          let quarter = <div className="quarter bi-2" key={i} />;
-          quarters.push(quarter);
-        }
-        let nodes = [];
-        for (let i = 0; i < 24; i++) {
-          const pos = this.state.board[i].position;
-          const player = this.state.board[i].controllingPlayer;
-          const additionalClass = player === 0 ? 'unclicked-node' : '';
-          let node = (
-            <Node
-              nodeNumber={i}
-              key={'cell' + i}
-              controllingPlayer={player}
-              position={pos}
-              nodeIsClicked={this.playerMove.bind(this)}
-              className={additionalClass}
-            />
-          );
-          nodes.push(node);
-        }
-    
-    
-        return (
-          <div className="app">
-            
-            <div className="board bi-2">
-              {nodes}
-              {/* <div className="phase-div bi-3">Game Phase: <span className="black">{this.state.gamePhase}</span></div>
-              <div className="player-div bi-3"> Player <span className="black">{this.state.currentPlayer}</span></div> */}
-              <div className="info-div bi-3">{this.state.info}</div>
-              {quarters}
-              <div className="inner1 bi-4"/>
-              <div className="inner2 bi-4"/>
-              {/* <div className="lateral bi-3"><span className="white">Player 1 Pieces left: {this.state.player1Nodes}</span></div>
-              <div className="lateral2 bi-3"><span className="black">Player 2 Pieces left: {this.state.player2Nodes}</span></div> */}
-            </div>
-          </div>
-        );
-      }
-    
-    }
-    
-    let getPosition = function(index) {
-      let xPos = 0;
-      let yPos = 0;
-      if (index == 0 || index == 1 || index == 2) {
-        yPos = 0;
-      } else if (index == 8 || index == 9 || index == 10) {
-        yPos = 16.66;
-      } else if (index == 16 || index == 17 || index == 18) {
-        yPos = 33.33;
-      } else if (index == 7 || index == 15 || index == 23 || index == 19 || index == 11 || index == 3) {
-        yPos = 50;
-      } else if (index == 22 || index == 21 || index == 20) {
-        yPos = 66.66;
-      } else if (index == 14 || index == 13 || index == 12) {
-        yPos = 83.33;
-      } else if (index == 6 || index == 5 || index == 4) {
-        yPos = 100;
-      }
-      if (index == 0 || index == 7 || index == 6) {
-        xPos = 0;
-      } else if (index == 8 || index == 15 || index == 14) {
-        xPos = 16.66;
-      } else if (index == 16 || index == 23 || index == 22) {
-        xPos = 33.33;
-      } else if (index == 1 || index == 9 || index == 17 || index == 21 || index == 13 || index == 5) {
-        xPos = 50;
-      } else if (index == 18 || index == 19 || index == 20) {
-        xPos = 66.66;
-      } else if (index == 10 || index == 11 || index == 12) {
-        xPos = 83.33;
-      } else if (index == 2 || index == 3 || index == 4) {
-        xPos = 100;
-      }
-    
-      return { "xPos": xPos, "yPos": yPos};
-    }
-    
-    export default Shaxboard;
+  // Show temporary info messages
+  showTemporaryInfo(message) {
+    const previousInfo = this.state.info;
+    this.setState({ info: message });
+    setTimeout(() => this.setState({ info: previousInfo }), 5500);
+  }
+
+  // Calculate the position of a node on the board
+  getPosition(index) {
+    const positions = [
+      [0, 0], [50, 0], [100, 0],
+      [100, 50], [100, 100], [50, 100], [0, 100], [0, 50],
+      [16.66, 16.66], [50, 16.66], [83.33, 16.66],
+      [83.33, 50], [83.33, 83.33], [50, 83.33], [16.66, 83.33], [16.66, 50],
+      [33.33, 33.33], [50, 33.33], [66.66, 33.33],
+      [66.66, 50], [66.66, 66.66], [50, 66.66], [33.33, 66.66], [33.33, 50],
+    ];
+    return { xPos: positions[index][0], yPos: positions[index][1] };
+  }
+
+  // Close the popup
+  closePopup = () => {
+    this.setState({ showPopup: false, popupMessage: '' });
+  }
+
+  // Render the game board and nodes
+  render() {
+    const nodes = this.state.board.map((node, i) => {
+      const additionalClass = node.controllingPlayer === 0 ? 'unclicked-node' : '';
+      return (
+        <Node
+          key={i}
+          nodeNumber={i}
+          controllingPlayer={node.controllingPlayer}
+          position={node.position}
+          nodeIsClicked={this.playerMove.bind(this)}
+          className={additionalClass}
+        />
+      );
+    });
+
+    // Conditionally apply pointer events to the app container based on popup visibility
+    const appClassName = this.state.showPopup ? 'app disabled' : 'app';
+
+    return (
+      <div className={appClassName}>
+        <div className="board bi-2">
+          {nodes}
+          <div className="info-div bi-3">{this.state.info}</div>
+          {[...Array(4)].map((_, i) => <div className="quarter bi-2" key={i} />)}
+          <div className="inner1 bi-4" />
+          <div className="inner2 bi-4" />
+        </div>
+        {this.state.showPopup && (
+          <Popup 
+            message={this.state.popupMessage}
+            onClose={this.closePopup}
+          />
+        )}
+      </div>
+    );
+  }
+}
+
+export default Shaxboard;
