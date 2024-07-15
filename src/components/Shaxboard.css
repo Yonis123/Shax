@@ -292,7 +292,7 @@
   background-color: lightcoral; /* Light red background */
 }
 
-.reset-button {
+.reset-button, .help-button {
   margin-top: 20px;
   padding: 10px 20px;
   font-size: 16px;
@@ -303,6 +303,12 @@
   cursor: pointer;
 }
 
-.reset-button:hover {
+.reset-button:hover, .help-button:hover {
   background-color: #0056b3;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }

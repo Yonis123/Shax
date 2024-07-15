@@ -22,6 +22,7 @@ class Shaxboard extends React.Component {
       removePiece: false,
       firstRemovalDone: false, // Track if the first removal in phase 2 is done
       selectedNode: null, // Track selected node in Phase III
+      blockedHelpUsed: false, // Track if "I am blocked, help" was used
     };
   }
 
@@ -120,13 +121,13 @@ class Shaxboard extends React.Component {
 
   // Handle player move
   playerMove(node) {
-    const { board, currentPlayer, gamePhase, removePiece, firstMillPlayer, firstRemovalDone, selectedNode } = this.state;
+    const { board, currentPlayer, gamePhase, removePiece, firstMillPlayer, firstRemovalDone, selectedNode, blockedHelpUsed } = this.state;
 
     if (removePiece) {
       this.handleRemovePiece(node);
     } else if (gamePhase === "III") {
       if (selectedNode === null) {
-        if (board[node].controllingPlayer === currentPlayer && this.hasEmptyDirectionalAdjacentNode(node)) {
+        if (board[node].controllingPlayer === currentPlayer) {
           this.setState({ selectedNode: node, info: `Player ${currentPlayer}, select an empty node to move to.` });
         } else {
           this.showTemporaryInfo("Invalid selection!");
@@ -150,9 +151,11 @@ class Shaxboard extends React.Component {
                   removePiece: true,
                 });
               } else {
+                const nextPlayer = blockedHelpUsed ? this.getNextPlayer(currentPlayer) : this.getNextPlayer(currentPlayer);
                 this.setState({
-                  currentPlayer: this.getNextPlayer(currentPlayer),
-                  info: `Player ${this.getNextPlayer(currentPlayer)}'s turn to move a piece.`,
+                  currentPlayer: nextPlayer,
+                  blockedHelpUsed: false,
+                  info: `Player ${nextPlayer}'s turn to move a piece.`,
                 });
               }
             });
@@ -251,7 +254,7 @@ class Shaxboard extends React.Component {
         });
       } else {
         const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-        if (this.state.player2Moves === 12) {
+        if (this.state.player2Moves  === 12) {
           // Move to phase II if all pieces have been placed
           const firstMillPlayer = this.state.firstMillPlayer || 2;
           this.setState({
@@ -268,48 +271,6 @@ class Shaxboard extends React.Component {
         }
       }
     });
-  }
-
-  // Handle the third phase of the game where players move their pieces
-  handlePhaseIII(node) {
-    const { board, currentPlayer, selectedNode } = this.state;
-
-    if (selectedNode === null) {
-      if (board[node].controllingPlayer === currentPlayer && this.hasEmptyDirectionalAdjacentNode(node)) {
-        this.setState({ selectedNode: node, info: `Player ${currentPlayer}, select an empty node to move to.` });
-      } else {
-        this.showTemporaryInfo("Invalid selection!");
-      }
-    } else {
-      if (board[node].controllingPlayer === currentPlayer) {
-        // Allow selecting another piece to move
-        this.setState({ selectedNode: node, info: `Player ${currentPlayer}, select an empty node to move to.` });
-      } else {
-        const adjacentNodes = this.getAdjacentNodes(selectedNode);
-        if (board[node].controllingPlayer === 0 && adjacentNodes.includes(node)) {
-          board[node].controllingPlayer = currentPlayer;
-          board[selectedNode].controllingPlayer = 0;
-          this.setState({
-            board,
-            selectedNode: null,
-          }, () => {
-            if (this.millIsFormed(node)) {
-              this.setState({
-                info: `Player ${currentPlayer} formed a mill! Remove an opponent's piece.`,
-                removePiece: true,
-              });
-            } else {
-              this.setState({
-                currentPlayer: this.getNextPlayer(currentPlayer),
-                info: `Player ${this.getNextPlayer(currentPlayer)}'s turn to move a piece.`,
-              });
-            }
-          });
-        } else {
-          this.showTemporaryInfo("Invalid move!");
-        }
-      }
-    }
   }
 
   // Show temporary info messages
@@ -336,6 +297,7 @@ class Shaxboard extends React.Component {
       removePiece: false,
       firstRemovalDone: false,
       selectedNode: null,
+      blockedHelpUsed: false,
     });
   };
 
@@ -344,18 +306,11 @@ class Shaxboard extends React.Component {
     const { currentPlayer } = this.state;
     const nextPlayer = this.getNextPlayer(currentPlayer);
 
-    // Switch to the next player
+    // Switch to the next player and set the flag to indicate help was used
     this.setState({
       currentPlayer: nextPlayer,
+      blockedHelpUsed: true,
       info: `Player ${nextPlayer}'s turn.`,
-    }, () => {
-      // After a brief delay, switch back to the original player
-      setTimeout(() => {
-        this.setState({
-          currentPlayer,
-          info: `Player ${currentPlayer}'s turn.`,
-        });
-      }, 1000); // Adjust the delay as needed
     });
   };
 
@@ -381,7 +336,7 @@ class Shaxboard extends React.Component {
   render() {
     const nodes = this.state.board.map((node, i) => {
       const additionalClass = node.controllingPlayer === 0 ? 'unclicked-node' : '';
-      const highlightClass = (this.state.gamePhase === "III" && node.controllingPlayer === this.state.currentPlayer && this.hasEmptyDirectionalAdjacentNode(i)) ? 'highlight' : '';
+      const highlightClass = (this.state.gamePhase === "III" && node.controllingPlayer === this.state.currentPlayer) ? 'highlight' : '';
       const selectedClass = (this.state.selectedNode === i) ? 'selected' : '';
 
       return (
