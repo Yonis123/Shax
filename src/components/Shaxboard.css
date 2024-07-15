@@ -1,7 +1,4 @@
-.highlight {
-  border-color: #a600ff; /* Golden border */
-  background-color: #d2f50f; /* Light yellow background */
-}
+
 
 
 
@@ -283,4 +280,29 @@
     width: 35vw;
     font-size: 0.8em;
   }
+}
+
+.highlight {
+  border-color: green; /* Green border */
+  background-color: lightgreen; /* Light green background */
+}
+
+.selected {
+  border-color: red; /* Red border */
+  background-color: lightcoral; /* Light red background */
+}
+
+.reset-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background-color: #0056b3;
 }

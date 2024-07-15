@@ -115,7 +115,7 @@ class Shaxboard extends React.Component {
       right: (index % 8 !== 7) ? index + 1 : null
     };
 
-    return Object.values(directions).some(adjIndex => adjIndex !== null && board[adjIndex].controllingPlayer === 0);
+    return Object.values(directions).some(adjIndex => adjIndex !== null && board[adjIndex]?.controllingPlayer === 0);
   }
 
   // Handle player move
@@ -132,18 +132,33 @@ class Shaxboard extends React.Component {
           this.showTemporaryInfo("Invalid selection!");
         }
       } else {
-        const directions = this.getAdjacentNodes(selectedNode);
-        if (board[node].controllingPlayer === 0 && directions.includes(node)) {
-          board[node].controllingPlayer = currentPlayer;
-          board[selectedNode].controllingPlayer = 0;
-          this.setState({
-            board,
-            selectedNode: null,
-            currentPlayer: this.getNextPlayer(currentPlayer),
-            info: `Player ${this.getNextPlayer(currentPlayer)}'s turn to move a piece.`,
-          });
+        if (board[node].controllingPlayer === currentPlayer) {
+          // Allow selecting another piece to move
+          this.setState({ selectedNode: node, info: `Player ${currentPlayer}, select an empty node to move to.` });
         } else {
-          this.showTemporaryInfo("Invalid move!");
+          const adjacentNodes = this.getAdjacentNodes(selectedNode);
+          if (board[node].controllingPlayer === 0 && adjacentNodes.includes(node)) {
+            board[node].controllingPlayer = currentPlayer;
+            board[selectedNode].controllingPlayer = 0;
+            this.setState({
+              board,
+              selectedNode: null,
+            }, () => {
+              if (this.millIsFormed(node)) {
+                this.setState({
+                  info: `Player ${currentPlayer} formed a mill! Remove an opponent's piece.`,
+                  removePiece: true,
+                });
+              } else {
+                this.setState({
+                  currentPlayer: this.getNextPlayer(currentPlayer),
+                  info: `Player ${this.getNextPlayer(currentPlayer)}'s turn to move a piece.`,
+                });
+              }
+            });
+          } else {
+            this.showTemporaryInfo("Invalid move!");
+          }
         }
       }
     } else if (board[node].controllingPlayer === 0) {
@@ -159,7 +174,7 @@ class Shaxboard extends React.Component {
 
   handleRemovePiece(node) {
     const board = [...this.state.board];
-    const { firstMillPlayer, firstRemovalDone, currentPlayer } = this.state;
+    const { currentPlayer, firstRemovalDone } = this.state;
     const opponentPlayer = this.getNextPlayer(currentPlayer);
     const opponentPlayerKey = currentPlayer === 1 ? 'player2Nodes' : 'player1Nodes';
 
@@ -168,183 +183,243 @@ class Shaxboard extends React.Component {
       this.setState(prevState => ({
         board,
         removePiece: false,
-        info: `Player ${firstMillPlayer}'s turn to move a piece.`,
+        info: `Player ${currentPlayer}'s turn to move a piece.`,
         [opponentPlayerKey]: prevState[opponentPlayerKey] - 1,
-        currentPlayer: firstMillPlayer,
       }), () => {
-if (!firstRemovalDone) {
-  // Allow the opponent to remove a piece
-  this.setState({
-    info: `Player ${opponentPlayer} removes an opponent's piece.`,
-    removePiece: true,
-    currentPlayer: opponentPlayer,
-    firstRemovalDone: true,
-  });
-} else {
-  // Transition to phase III
-  const firstMovePlayer = this.state.firstMillPlayer || 2;
-  this.setState({
-    gamePhase: "III",
-    info: `Game Phase III: Player ${firstMovePlayer} starts moving pieces.`,
-    removePiece: false,
-    firstRemovalDone: false, // Reset for future removals
-    currentPlayer: firstMovePlayer,
-  });
-}
-});
-} else {
-this.showTemporaryInfo("Invalid removal! You must remove an opponent's piece.");
-}
+        if (this.state.gamePhase === "II") {
+          if (!firstRemovalDone) {
+            // Allow the opponent to remove a piece
+            this.setState({
+              info: `Player ${opponentPlayer} removes an opponent's piece.`,
+              removePiece: true,
+              currentPlayer: opponentPlayer,
+              firstRemovalDone: true,
+            });
+          } else {
+            // Transition to phase III
+            const firstMovePlayer = this.state.firstMillPlayer || 2;
+            this.setState({
+              gamePhase: "III",
+              info: `Game Phase III: Player ${firstMovePlayer} starts moving pieces.`,
+              removePiece: false,
+              firstRemovalDone: false, // Reset for future removals
+              currentPlayer: firstMovePlayer,
+            });
+          }
+        } else if (this.state.gamePhase === "III") {
+          // Continue to the next player's turn in Phase III
+          this.setState({
+            currentPlayer: this.getNextPlayer(currentPlayer),
+            info: `Player ${this.getNextPlayer(currentPlayer)}'s turn to move a piece.`,
+          });
+        }
+      });
+    } else {
+      this.showTemporaryInfo("Invalid removal! You must remove an opponent's piece.");
+    }
+  }
+
+  // Handle the first phase of the game where players place their pieces
+  handlePhaseI(node) {
+    const board = [...this.state.board];
+    board[node].controllingPlayer = this.state.currentPlayer;
+    const playerKey = this.state.currentPlayer === 1 ? 'player1Nodes' : 'player2Nodes';
+    const moveKey = this.state.currentPlayer === 1 ? 'player1Moves' : 'player2Moves';
+
+    this.setState(prevState => ({
+      board,
+      [playerKey]: prevState[playerKey] + 1,
+      [moveKey]: prevState[moveKey] + 1,
+    }), () => {
+      if (this.millIsFormed(node)) {
+        const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
+        this.setState({
+          info: `Player ${this.state.currentPlayer} formed a mill!`,
+          firstMillPlayer: this.state.firstMillPlayer || this.state.currentPlayer, // Store the first mill player
+          showPopup: true,
+          popupMessage: 'Mill formed!',
+          currentPlayer: nextPlayer,
+        }, () => {
+          this.setState({
+            info: `Player ${nextPlayer}'s turn to place a piece.`,
+          });
+
+          // Hide the popup after 2 seconds
+          setTimeout(() => {
+            this.setState({ showPopup: false });
+          }, 2000);
+        });
+      } else {
+        const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
+        if (this.state.player2Moves === 12) {
+          // Move to phase II if all pieces have been placed
+          const firstMillPlayer = this.state.firstMillPlayer || 2;
+          this.setState({
+            gamePhase: "II",
+            info: `Game Phase II: Player ${firstMillPlayer} removes an opponent's piece.`,
+            removePiece: true,
+            currentPlayer: firstMillPlayer,
+          });
+        } else {
+          this.setState({
+            currentPlayer: nextPlayer,
+            info: `Player ${nextPlayer}'s turn to place a piece.`,
+          });
+        }
+      }
+    });
+  }
+
+  // Handle the third phase of the game where players move their pieces
+  handlePhaseIII(node) {
+    const { board, currentPlayer, selectedNode } = this.state;
+
+    if (selectedNode === null) {
+      if (board[node].controllingPlayer === currentPlayer && this.hasEmptyDirectionalAdjacentNode(node)) {
+        this.setState({ selectedNode: node, info: `Player ${currentPlayer}, select an empty node to move to.` });
+      } else {
+        this.showTemporaryInfo("Invalid selection!");
+      }
+    } else {
+      if (board[node].controllingPlayer === currentPlayer) {
+        // Allow selecting another piece to move
+        this.setState({ selectedNode: node, info: `Player ${currentPlayer}, select an empty node to move to.` });
+      } else {
+        const adjacentNodes = this.getAdjacentNodes(selectedNode);
+        if (board[node].controllingPlayer === 0 && adjacentNodes.includes(node)) {
+          board[node].controllingPlayer = currentPlayer;
+          board[selectedNode].controllingPlayer = 0;
+          this.setState({
+            board,
+            selectedNode: null,
+          }, () => {
+            if (this.millIsFormed(node)) {
+              this.setState({
+                info: `Player ${currentPlayer} formed a mill! Remove an opponent's piece.`,
+                removePiece: true,
+              });
+            } else {
+              this.setState({
+                currentPlayer: this.getNextPlayer(currentPlayer),
+                info: `Player ${this.getNextPlayer(currentPlayer)}'s turn to move a piece.`,
+              });
+            }
+          });
+        } else {
+          this.showTemporaryInfo("Invalid move!");
+        }
+      }
+    }
+  }
+
+  // Show temporary info messages
+  showTemporaryInfo(message) {
+    const previousInfo = this.state.info;
+    this.setState({ info: message });
+    setTimeout(() => this.setState({ info: previousInfo }), 1000);
+  }
+
+  // Reset the game state
+  resetGame = () => {
+    this.setState({
+      board: this.initializeBoard(),
+      info: "Player 1's turn to place a piece.",
+      gamePhase: "I",
+      player1Moves: 0,
+      player2Moves: 0,
+      player1Nodes: 0,
+      player2Nodes: 0,
+      currentPlayer: 1,
+      firstMillPlayer: null,
+      showPopup: false,
+      popupMessage: '',
+      removePiece: false,
+      firstRemovalDone: false,
+      selectedNode: null,
+    });
+  };
+
+  // Handle the "I am blocked, help" button click
+  handleBlockedHelp = () => {
+    const { currentPlayer } = this.state;
+    const nextPlayer = this.getNextPlayer(currentPlayer);
+
+    // Switch to the next player
+    this.setState({
+      currentPlayer: nextPlayer,
+      info: `Player ${nextPlayer}'s turn.`,
+    }, () => {
+      // After a brief delay, switch back to the original player
+      setTimeout(() => {
+        this.setState({
+          currentPlayer,
+          info: `Player ${currentPlayer}'s turn.`,
+        });
+      }, 1000); // Adjust the delay as needed
+    });
+  };
+
+  // Calculate the position of a node on the board
+  getPosition(index) {
+    const positions = [
+      [0, 0], [50, 0], [100, 0],
+      [100, 50], [100, 100], [50, 100], [0, 100], [0, 50],
+      [16.66, 16.66], [50, 16.66], [83.33, 16.66],
+      [83.33, 50], [83.33, 83.33], [50, 83.33], [16.66, 83.33], [16.66, 50],
+      [33.33, 33.33], [50, 33.33], [66.66, 33.33],
+      [66.66, 50], [66.66, 66.66], [50, 66.66], [33.33, 66.66], [33.33, 50],
+    ];
+    return { xPos: positions[index][0], yPos: positions[index][1] };
+  }
+
+  // Close the popup
+  closePopup = () => {
+    this.setState({ showPopup: false, popupMessage: '' });
+  }
+
+  // Render the game board and nodes
+  render() {
+    const nodes = this.state.board.map((node, i) => {
+      const additionalClass = node.controllingPlayer === 0 ? 'unclicked-node' : '';
+      const highlightClass = (this.state.gamePhase === "III" && node.controllingPlayer === this.state.currentPlayer && this.hasEmptyDirectionalAdjacentNode(i)) ? 'highlight' : '';
+      const selectedClass = (this.state.selectedNode === i) ? 'selected' : '';
+
+      return (
+        <Node
+          key={i}
+          nodeNumber={i}
+          controllingPlayer={node.controllingPlayer}
+          position={node.position}
+          nodeIsClicked={this.playerMove.bind(this)}
+          className={`${additionalClass} ${highlightClass} ${selectedClass}`}
+        />
+      );
+    });
+
+    const appClassName = this.state.showPopup ? 'app disabled' : 'app';
+
+    return (
+      <div className={appClassName}>
+        <div className="board bi-2">
+          {nodes}
+          <div className="info-div bi-3">{this.state.info}</div>
+          {[...Array(4)].map((_, i) => <div className="quarter bi-2" key={i} />)}
+          <div className="inner1 bi-4" />
+          <div className="inner2 bi-4" />
+        </div>
+        {this.state.showPopup && (
+          <Popup 
+            message={this.state.popupMessage}
+            onClose={this.closePopup}
+          />
+        )}
+        <div className="button-container">
+          <button onClick={this.resetGame} className="reset-button">Reset Game</button>
+          <button onClick={this.handleBlockedHelp} className="help-button">I am blocked, help</button>
+        </div>
+      </div>
+    );
+  }
 }
 
-// Handle the first phase of the game where players place their pieces
-handlePhaseI(node) {
-const board = [...this.state.board];
-board[node].controllingPlayer = this.state.currentPlayer;
-const playerKey = this.state.currentPlayer === 1 ? 'player1Nodes' : 'player2Nodes';
-const moveKey = this.state.currentPlayer === 1 ? 'player1Moves' : 'player2Moves';
-
-this.setState(prevState => ({
-board,
-[playerKey]: prevState[playerKey] + 1,
-[moveKey]: prevState[moveKey] + 1,
-}), () => {
-if (this.millIsFormed(node)) {
-const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-this.setState({
-  info: `Player ${this.state.currentPlayer} formed a mill!`,
-  firstMillPlayer: this.state.firstMillPlayer || this.state.currentPlayer, // Store the first mill player
-  showPopup: true,
-  popupMessage: 'Mill formed!',
-  currentPlayer: nextPlayer,
-}, () => {
-  this.setState({
-    info: `Player ${nextPlayer}'s turn to place a piece.`,
-  });
-
-  // Hide the popup after 2 seconds
-  setTimeout(() => {
-    this.setState({ showPopup: false });
-  }, 2000);
-});
-} else {
-const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-if (this.state.player2Moves === 12) {
-  // Move to phase II if all pieces have been placed
-  const firstMillPlayer = this.state.firstMillPlayer || 2;
-  this.setState({
-    gamePhase: "II",
-    info: `Game Phase II: Player ${firstMillPlayer} removes an opponent's piece.`,
-    removePiece: true,
-    currentPlayer: firstMillPlayer,
-  });
-} else {
-  this.setState({
-    currentPlayer: nextPlayer,
-    info: `Player ${nextPlayer}'s turn to place a piece.`,
-  });
-}
-}
-});
-}
-
-// Handle the third phase of the game where players move their pieces
-handlePhaseIII(node) {
-const { board, currentPlayer, selectedNode } = this.state;
-
-if (selectedNode === null) {
-if (board[node].controllingPlayer === currentPlayer && this.hasEmptyDirectionalAdjacentNode(node)) {
-this.setState({ selectedNode: node, info: `Player ${currentPlayer}, select an empty node to move to.` });
-} else {
-this.showTemporaryInfo("Invalid selection!");
-}
-} else {
-const directions = {
-top: selectedNode - 8 >= 0 ? selectedNode - 8 : null,
-bottom: selectedNode + 8 < 24 ? selectedNode + 8 : null,
-left: (selectedNode % 8 !== 0) ? selectedNode - 1 : null,
-right: (selectedNode % 8 !== 7) ? selectedNode + 1 : null
-};
-const validMove = Object.values(directions).includes(node);
-
-if (board[node].controllingPlayer === 0 && validMove) {
-board[node].controllingPlayer = currentPlayer;
-board[selectedNode].controllingPlayer = 0;
-this.setState({
-  board,
-  selectedNode: null,
-  currentPlayer: this.getNextPlayer(currentPlayer),
-  info: `Player ${this.getNextPlayer(currentPlayer)}'s turn to move a piece.`,
-});
-} else {
-this.showTemporaryInfo("Invalid move!");
-}
-}
-}
-
-// Show temporary info messages
-showTemporaryInfo(message) {
-const previousInfo = this.state.info;
-this.setState({ info: message });
-setTimeout(() => this.setState({ info: previousInfo }), 1500);
-}
-
-// Calculate the position of a node on the board
-getPosition(index) {
-const positions = [
-[0, 0], [50, 0], [100, 0],
-[100, 50], [100, 100], [50, 100], [0, 100], [0, 50],
-[16.66, 16.66], [50, 16.66], [83.33, 16.66],
-[83.33, 50], [83.33, 83.33], [50, 83.33], [16.66, 83.33], [16.66, 50],
-[33.33, 33.33], [50, 33.33], [66.66, 33.33],
-[66.66, 50], [66.66, 66.66], [50, 66.66], [33.33, 66.66], [33.33, 50],
-];
-return { xPos: positions[index][0], yPos: positions[index][1] };
-}
-
-// Close the popup
-closePopup = () => {
-this.setState({ showPopup: false, popupMessage: '' });
-}
-
-// Render the game board and nodes
-render() {
-const nodes = this.state.board.map((node, i) => {
-const additionalClass = node.controllingPlayer === 0 ? 'unclicked-node' : '';
-const highlightClass = (this.state.gamePhase === "III" && node.controllingPlayer === this.state.currentPlayer && this.hasEmptyDirectionalAdjacentNode(i)) ? 'highlight' : '';
-
-return (
-<Node
-  key={i}
-  nodeNumber={i}
-  controllingPlayer={node.controllingPlayer}
-  position={node.position}
-  nodeIsClicked={this.playerMove.bind(this)}
-  className={`${additionalClass} ${highlightClass}`}
-/>
-);
-});
-
-const appClassName = this.state.showPopup ? 'app disabled' : 'app';
-
-return (
-<div className={appClassName}>
-<div className="board bi-2">
-  {nodes}
-  <div className="info-div bi-3">{this.state.info}</div>
-  {[...Array(4)].map((_, i) => <div className="quarter bi-2" key={i} />)}
-  <div className="inner1 bi-4" />
-  <div className="inner2 bi-4" />
-</div>
-{this.state.showPopup && (
-  <Popup 
-    message={this.state.popupMessage}
-    onClose={this.closePopup}
-  />
-)}
-</div>
-);
-}
-}
-
-export default Shaxboard
+export default Shaxboard;
