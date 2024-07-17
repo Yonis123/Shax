@@ -1,12 +1,18 @@
 import React from 'react';
 import './Popup.css';
 
-const Popup = ({ message, onClose }) => (
-  <div className={`popup-overlay ${!message && 'hidden'}`}>
-    <div className="popup-content">
-      <p>{message}</p>
-    </div>
-  </div>
-);
+class Popup extends React.Component {
+  render() {
+    return (
+      <div className="popup-overlay">
+        <div className="popup">
+          <h2>{this.props.message}</h2>
+          <button onClick={this.props.onClose}>Close</button>
+          <button onClick={this.props.onReset}>Reset Game</button>
+        </div>
+      </div>
+    );
+  }
+}
 
 export default Popup;

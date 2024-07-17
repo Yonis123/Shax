@@ -23,6 +23,7 @@ class Shaxboard extends React.Component {
       firstRemovalDone: false, // Track if the first removal in phase 2 is done
       selectedNode: null, // Track selected node in Phase III
       blockedHelpUsed: false, // Track if "I am blocked, help" was used
+      winner: null, // Track the winner
     };
   }
 
@@ -146,10 +147,20 @@ class Shaxboard extends React.Component {
               selectedNode: null,
             }, () => {
               if (this.millIsFormed(node)) {
-                this.setState({
-                  info: `Player ${currentPlayer} formed a mill! Remove an opponent's piece.`,
-                  removePiece: true,
-                });
+                if (blockedHelpUsed) {
+                  // If blockedHelpUsed is true and a mill is formed, switch back to the other player
+                  const nextPlayer = this.getNextPlayer(currentPlayer);
+                  this.setState({
+                    currentPlayer: nextPlayer,
+                    blockedHelpUsed: false,
+                    info: `Player ${nextPlayer}'s turn to move a piece.`,
+                  });
+                } else {
+                  this.setState({
+                    info: `Player ${currentPlayer} formed a mill! Remove an opponent's piece.`,
+                    removePiece: true,
+                  });
+                }
               } else {
                 const nextPlayer = blockedHelpUsed ? this.getNextPlayer(currentPlayer) : this.getNextPlayer(currentPlayer);
                 this.setState({
@@ -189,37 +200,50 @@ class Shaxboard extends React.Component {
         info: `Player ${currentPlayer}'s turn to move a piece.`,
         [opponentPlayerKey]: prevState[opponentPlayerKey] - 1,
       }), () => {
-        if (this.state.gamePhase === "II") {
-          if (!firstRemovalDone) {
-            // Allow the opponent to remove a piece
+        if (this.checkForWin(opponentPlayerKey)) {
+          this.setState({
+            showPopup: true,
+            popupMessage: `Player ${currentPlayer} wins!`,
+            winner: currentPlayer,
+          });
+        } else {
+          if (this.state.gamePhase === "II") {
+            if (!firstRemovalDone) {
+              // Allow the opponent to remove a piece
+              this.setState({
+                info: `Player ${opponentPlayer} removes an opponent's piece.`,
+                removePiece: true,
+                currentPlayer: opponentPlayer,
+                firstRemovalDone: true,
+              });
+            } else {
+              // Transition to phase III
+              const firstMovePlayer = this.state.firstMillPlayer || 2;
+              this.setState({
+                gamePhase: "III",
+                info: `Game Phase III: Player ${firstMovePlayer} starts moving pieces.`,
+                removePiece: false,
+                firstRemovalDone: false, // Reset for future removals
+                currentPlayer: firstMovePlayer,
+              });
+            }
+          } else if (this.state.gamePhase === "III") {
+            // Continue to the next player's turn in Phase III
             this.setState({
-              info: `Player ${opponentPlayer} removes an opponent's piece.`,
-              removePiece: true,
-              currentPlayer: opponentPlayer,
-              firstRemovalDone: true,
-            });
-          } else {
-            // Transition to phase III
-            const firstMovePlayer = this.state.firstMillPlayer || 2;
-            this.setState({
-              gamePhase: "III",
-              info: `Game Phase III: Player ${firstMovePlayer} starts moving pieces.`,
-              removePiece: false,
-              firstRemovalDone: false, // Reset for future removals
-              currentPlayer: firstMovePlayer,
+              currentPlayer: this.getNextPlayer(currentPlayer),
+              info: `Player ${this.getNextPlayer(currentPlayer)}'s turn to move a piece.`,
             });
           }
-        } else if (this.state.gamePhase === "III") {
-          // Continue to the next player's turn in Phase III
-          this.setState({
-            currentPlayer: this.getNextPlayer(currentPlayer),
-            info: `Player ${this.getNextPlayer(currentPlayer)}'s turn to move a piece.`,
-          });
         }
       });
     } else {
       this.showTemporaryInfo("Invalid removal! You must remove an opponent's piece.");
     }
+  }
+
+  // Check if a player has won by having less than 3 pieces
+  checkForWin(opponentPlayerKey) {
+    return this.state[opponentPlayerKey] < 3;
   }
 
   // Handle the first phase of the game where players place their pieces
@@ -236,25 +260,36 @@ class Shaxboard extends React.Component {
     }), () => {
       if (this.millIsFormed(node)) {
         const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-        this.setState({
-          info: `Player ${this.state.currentPlayer} formed a mill!`,
-          firstMillPlayer: this.state.firstMillPlayer || this.state.currentPlayer, // Store the first mill player
-          showPopup: true,
-          popupMessage: 'Mill formed!',
-          currentPlayer: nextPlayer,
-        }, () => {
+        if (!this.state.firstMillPlayer) {
           this.setState({
-            info: `Player ${nextPlayer}'s turn to place a piece.`,
-          });
+            info: `Player ${this.state.currentPlayer} formed a mill!`,
+            firstMillPlayer: this.state.currentPlayer, // Store the first mill player
+            showPopup: true,
+            popupMessage: 'Mill formed!',
+            currentPlayer: nextPlayer,
+          }, () => {
+            this.setState({
+              info: `Player ${nextPlayer}'s turn to place a piece.`,
+            });
 
-          // Hide the popup after 2 seconds
-          setTimeout(() => {
-            this.setState({ showPopup: false });
-          }, 2000);
-        });
+            // Hide the popup after 2 seconds
+            setTimeout(() => {
+              this.setState({ showPopup: false });
+            }, 2000);
+          });
+        } else {
+          this.setState({
+            info: `Player ${this.state.currentPlayer} formed a mill!`,
+            currentPlayer: nextPlayer,
+          }, () => {
+            this.setState({
+              info: `Player ${nextPlayer}'s turn to place a piece.`,
+            });
+          });
+        }
       } else {
         const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-        if (this.state.player2Moves  === 12) {
+        if (this.state.player2Moves + 1 === 12) {
           // Move to phase II if all pieces have been placed
           const firstMillPlayer = this.state.firstMillPlayer || 2;
           this.setState({
@@ -298,6 +333,7 @@ class Shaxboard extends React.Component {
       firstRemovalDone: false,
       selectedNode: null,
       blockedHelpUsed: false,
+      winner: null,
     });
   };
 
@@ -366,11 +402,14 @@ class Shaxboard extends React.Component {
           <Popup 
             message={this.state.popupMessage}
             onClose={this.closePopup}
+            onReset={this.resetGame}
           />
         )}
         <div className="button-container">
           <button onClick={this.resetGame} className="reset-button">Reset Game</button>
-          <button onClick={this.handleBlockedHelp} className="help-button">I am blocked, help</button>
+          {this.state.gamePhase === "III" && (
+            <button onClick={this.handleBlockedHelp} className="help-button">I am blocked, help</button>
+          )}
         </div>
       </div>
     );
