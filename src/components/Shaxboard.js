@@ -24,6 +24,7 @@ class Shaxboard extends React.Component {
       selectedNode: null, // Track selected node in Phase III
       blockedHelpUsed: false, // Track if "I am blocked, help" was used
       winner: null, // Track the winner
+      gameOver: false, // Track if the game is over
     };
   }
 
@@ -205,6 +206,7 @@ class Shaxboard extends React.Component {
             showPopup: true,
             popupMessage: `Player ${currentPlayer} wins!`,
             winner: currentPlayer,
+            gameOver: true,
           });
         } else {
           if (this.state.gamePhase === "II") {
@@ -289,7 +291,7 @@ class Shaxboard extends React.Component {
         }
       } else {
         const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-        if (this.state.player2Moves + 1 === 12) {
+        if (this.state.player2Moves === 12) {
           // Move to phase II if all pieces have been placed
           const firstMillPlayer = this.state.firstMillPlayer || 2;
           this.setState({
@@ -334,6 +336,7 @@ class Shaxboard extends React.Component {
       selectedNode: null,
       blockedHelpUsed: false,
       winner: null,
+      gameOver: false,
     });
   };
 
@@ -403,6 +406,7 @@ class Shaxboard extends React.Component {
             message={this.state.popupMessage}
             onClose={this.closePopup}
             onReset={this.resetGame}
+            gameOver={this.state.gameOver}
           />
         )}
         <div className="button-container">
