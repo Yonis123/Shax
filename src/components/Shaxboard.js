@@ -371,13 +371,13 @@ class Shaxboard extends React.Component {
     this.setState({ showPopup: false, popupMessage: '' });
   }
 
-  // Render the game board and nodes
-  render() {
+ render() {
+    const { appClassName } = this.props;
     const nodes = this.state.board.map((node, i) => {
       const additionalClass = node.controllingPlayer === 0 ? 'unclicked-node' : '';
-      const highlightClass = (this.state.gamePhase === "III" && node.controllingPlayer === this.state.currentPlayer) ? 'highlight' : '';
+      const highlightClass = (this.state.gamePhase === "III" && node.controllingPlayer === this.state.currentPlayer && this.hasEmptyDirectionalAdjacentNode(i)) ? 'highlight' : '';
       const selectedClass = (this.state.selectedNode === i) ? 'selected' : '';
-
+  
       return (
         <Node
           key={i}
@@ -390,14 +390,15 @@ class Shaxboard extends React.Component {
       );
     });
 
-    const appClassName = this.state.showPopup ? 'app disabled' : 'app';
-
     return (
       <div className={appClassName}>
         <div className="board bi-2">
           {nodes}
           <div className="info-div bi-3">{this.state.info}</div>
-          {[...Array(4)].map((_, i) => <div className="quarter bi-2" key={i} />)}
+          <div className="quarter bi-2 quarter1" />
+          <div className="quarter bi-2 quarter2" />
+          <div className="quarter bi-2 quarter3" />
+          <div className="quarter bi-2 quarter4" />
           <div className="inner1 bi-4" />
           <div className="inner2 bi-4" />
         </div>

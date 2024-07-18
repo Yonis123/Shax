@@ -1,4 +1,4 @@
-* Shax.css */
+/* Shaxboard.css */
 
 /* Info Div Styles with Shake Animation */
 .shake {
@@ -15,7 +15,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  
 }
 
 /* Title Styles */
@@ -34,7 +33,7 @@
 
 /* Board Styles */
 .board {
-  background-color: #FAFAFA; /* Very light grey background */
+  background-color: rgb(223, 219, 211); /* Very light grey background */
   box-sizing: border-box;
   width: 90vw; /* Use viewport width for responsiveness */
   max-width: 500px;
@@ -45,12 +44,12 @@
   position: relative;
   border-radius: 15px; /* Slightly larger rounded corners */
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Softer shadow for more depth */
-  border: 1px solid #DDD; /* Light grey border */
+  border: 0px solid #DDD; /* Light grey border */
 }
 
 /* Quarter Styles */
 .quarter {
-  background-color: #FFF; /* Pure white background */
+  background-color: rgb(223, 219, 211); /* Pure white background */
   box-sizing: border-box;
   display: inline-block;
   width: 50%;
@@ -58,15 +57,34 @@
   height: 0;
   padding-bottom: 50%;
   margin-bottom: -4px;
-  border: 2px solid #ECECEC; /* Lighter border */
+  border: 2px solid #333333; /* Lighter border */
+}
+
+.quarter1{
+  position: relative;
+  border-right: None;
+  border-bottom: None;
+}
+
+/* .quarter2 {
+  
+}
+
+.quarter3 {
+  
+} */
+
+.quarter4 {
+  border-top: None;
+  border-left: None;
 }
 
 /* Inner Board Styles */
 .inner1, .inner2 {
-  background-color: #FFF; /* Pure white background */
+  background-color: rgb(223, 219, 211); /* Pure white background */
   box-sizing: border-box;
   position: absolute;
-  border: 2px solid #ECECEC; /* Lighter border */
+  border: 2px solid #333333; /* Lighter border */
 }
 
 .inner1 {
@@ -140,7 +158,6 @@
   max-width: 380px;
   margin-top: 20px; /* Ensure this margin provides additional spacing */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Apply Segoe UI font */
-  
 }
 
 /* Define the keyframes for the green border animation */
@@ -213,17 +230,19 @@
 /* Line Styles */
 .line {
   position: absolute;
-  background-color: #FFD700; /* Golden lines for a bright accent */
+  background-color: #333333; /* Change to #333333 for a dark grey accent */
 }
 
 .horizontal-line {
   height: 2px; /* Line thickness */
   width: 33%; /* Adjust based on your layout */
+  background-color: #333333; /* Change to #333333 */
 }
 
 .vertical-line {
   width: 2px; /* Line thickness */
   height: 33%; /* Adjust based on your layout */
+  background-color: #333333; /* Change to #333333 */
 }
 
 /* Media Queries for Responsiveness */
