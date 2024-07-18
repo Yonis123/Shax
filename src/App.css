@@ -2,7 +2,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: rgb(223, 219, 211); 
+   background: linear-gradient(135deg, rgb(201, 198, 185), rgb(224, 207, 190)); 
 }
 
 #root {
