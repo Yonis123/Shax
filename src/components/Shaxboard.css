@@ -57,7 +57,7 @@
 
 /* Quarter Styles */
 .quarter {
-   background: linear-gradient(135deg, rgb(201, 186, 165), rgb(224, 207, 190));/* Very light grey background */
+  background-color: #f2e4d4;
   box-sizing: border-box;
   display: inline-block;
   width: 50%;
@@ -85,7 +85,7 @@
 
 /* Inner Board Styles */
 .inner1, .inner2 {
-   background: linear-gradient(135deg, rgb(201, 186, 165), rgb(224, 207, 190));
+  background-color: #f2e4d4;
   box-sizing: border-box;
   position: absolute;
   border: 2px solid #333333; /* Dark grey border */
@@ -133,7 +133,7 @@
 .phase-div, .player-div, .info-div {
   font-size: 1.4em;
   font-weight: 610;
-  color: #000000e0; /* Dark grey for better readability */
+  color: #4a4a4a;
   display: inline-block;
   position: absolute;
   left: 50%;
@@ -158,6 +158,15 @@
   width: 80vw; /* Responsive width */
   max-width: 380px;
   margin-top: 20px; /* Additional spacing */
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  padding: 10px;
+  /* background-color: rgba(240, 229, 195, 1); Example background color */
+  border-radius: 8px; /* Optional: to add some rounded corners */
 }
 
 /* Keyframes for the green border animation */

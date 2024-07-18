@@ -2,6 +2,8 @@ import React from 'react';
 import './Shaxboard.css';
 import Node from './Node.js';
 import Popup from './Popup';
+import { Helmet } from 'react-helmet';
+
 
 class Shaxboard extends React.Component {
   constructor() {
@@ -394,6 +396,12 @@ class Shaxboard extends React.Component {
       <div className={appClassName}>
         <div className="board bi-2">
           {nodes}
+          <Helmet>
+          <link
+            href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap"
+            rel="stylesheet"
+          />
+        </Helmet>
           <div className="info-div bi-3">{this.state.info}</div>
           <div className="quarter bi-2 quarter1" />
           <div className="quarter bi-2 quarter2" />
