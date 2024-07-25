@@ -9,7 +9,7 @@ class Node extends React.Component {
   render() {
     const { position, controllingPlayer, className } = this.props;
     const playerStyles = [
-      { width: 10, height: 10, bkg: "#333333" }, // Empty node
+      { width: 20, height: 20, bkg: "#5C3317" }, // Empty node
       { width: 30, height: 30, bkg: "#CCEDEF" }, // Player 1
       { width: 30, height: 30, bkg: "#2F4F4F" }  // Player 2
     ];

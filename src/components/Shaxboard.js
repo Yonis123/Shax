@@ -394,15 +394,13 @@ class Shaxboard extends React.Component {
 
     return (
       <div className={appClassName}>
+        <Helmet>
+           <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+          </Helmet>
+      <h1 className='header_for_board'>{this.state.info}</h1>
         <div className="board bi-2">
           {nodes}
-          <Helmet>
-          <link
-            href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap"
-            rel="stylesheet"
-          />
-        </Helmet>
-          <div className="info-div bi-3">{this.state.info}</div>
+          {/* <div className="info-div bi-3">{this.state.info}</div> */}
           <div className="quarter bi-2 quarter1" />
           <div className="quarter bi-2 quarter2" />
           <div className="quarter bi-2 quarter3" />
