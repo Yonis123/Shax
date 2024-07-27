@@ -417,9 +417,12 @@ class Shaxboard extends React.Component {
           />
         )}
         <div className="button-container">
-          <button onClick={this.resetGame} className="reset-button">Reset Game</button>
+          <Helmet>
+                <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet" />
+          </Helmet>
+          <button onClick={this.resetGame} className="reset-button">Reset</button>
           {this.state.gamePhase === "III" && (
-            <button onClick={this.handleBlockedHelp} className="help-button">I am blocked, help</button>
+            <button onClick={this.handleBlockedHelp} className="help-button">Jare</button>
           )}
         </div>
       </div>

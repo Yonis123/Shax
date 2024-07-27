@@ -33,6 +33,7 @@ class Node extends React.Component {
       height: `${playerStyle.height}px`,
       backgroundColor: playerStyle.bkg,
       borderRadius: '50%',
+
     };
 
     return (
