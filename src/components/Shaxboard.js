@@ -293,7 +293,7 @@ class Shaxboard extends React.Component {
         }
       } else {
         const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-        if (this.state.player2Moves === 12) {
+        if (this.state.player2Moves >= 12) {
           // Move to phase II if all pieces have been placed
           const firstMillPlayer = this.state.firstMillPlayer || 2;
           this.setState({

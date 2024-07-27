@@ -1,0 +1,37 @@
+.node {
+  position: absolute;
+  cursor: pointer;
+}
+
+.node .empty {
+  width: 20px;
+  height: 20px;
+  background-color: #5C3317;
+  border-radius: 50%;
+}
+
+.node .player1 {
+  width: 30px;
+  height: 30px;
+  background-color: #b4969f;
+  border-radius: 50%;
+background: radial-gradient(circle at 30% 30%, #fff, #5C3317); /* Player 1 color */ /* Soft gradient colors */
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3),
+                inset 2px 2px 4px rgba(0, 0, 0, 0.2),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.2);
+    transform: perspective(500px) rotateX(5deg) rotateY(5deg); /* Subtle rotation */
+    display: inline-block;
+}
+
+.node .player2 {
+  width: 30px;
+  height: 30px;
+  background-color: #2F4F4F;
+  border-radius: 50%;
+background: radial-gradient(circle at 30% 30%, #fff, #2F4F4F); /* Soft gradient colors */
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3),
+                inset 2px 2px 4px rgba(0, 0, 0, 0.2),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.2);
+    transform: perspective(500px) rotateX(5deg) rotateY(5deg); /* Subtle rotation */
+    display: inline-block;
+}

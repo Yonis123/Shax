@@ -332,6 +332,7 @@
 }
 
 .selected {
+
   border-color: red; /* Red border */
   background-color: lightcoral; /* Light red background */
 }
