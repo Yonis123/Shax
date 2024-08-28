@@ -446,9 +446,13 @@
 }
 
 
-.selected {
-  border: 5px solid red; /* Add a clear border for the selected node */
-  background-color: yellow; /* Change background color */
-  box-shadow: 0px 0px 15px 5px rgba(255, 0, 0, 0.75); /* Highlight effect */
-  transition: all 0.3s ease; /* Smooth transition for the styling */
+.highlight {
+  background-color: yellow;
+  border: 2px solid red; /* Example to make the highlight stand out */
+}
+
+/* When a node is selected */
+#selected-node {
+  border: 3px solid blue;  /* Example style for selected node */
+  box-shadow: 0 0 10px rgba(0, 0, 255, 0.5);  /* Example glowing effect */
 }

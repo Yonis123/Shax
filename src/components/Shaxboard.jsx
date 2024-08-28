@@ -1,7 +1,7 @@
 import React from 'react';
 import './Shaxboard.css';
-import Node from './Node.js';
-import Popup from './Popup';
+import Node from './Node.jsx';
+import Popup from './Popup.js';
 import { Helmet } from 'react-helmet';
 
 
@@ -251,66 +251,101 @@ class Shaxboard extends React.Component {
   }
 
   // Handle the first phase of the game where players place their pieces
-  handlePhaseI(node) {
-    const board = [...this.state.board];
-    board[node].controllingPlayer = this.state.currentPlayer;
-    const playerKey = this.state.currentPlayer === 1 ? 'player1Nodes' : 'player2Nodes';
-    const moveKey = this.state.currentPlayer === 1 ? 'player1Moves' : 'player2Moves';
-    
-    // Always increment the move count
-    this.setState(prevState => ({
-      board,
-      [playerKey]: prevState[playerKey] + 1,
-      [moveKey]: prevState[moveKey] + 1,
-    }), () => {
-      const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-  
-      // Check if a mill is formed
-      if (this.millIsFormed(node)) {
-        if (!this.state.firstMillPlayer) {
-          this.setState({
-            info: `Player ${this.state.currentPlayer} formed a mill!`,
-            firstMillPlayer: this.state.currentPlayer, // Store the first mill player
-            showPopup: true,
-            popupMessage: 'Mill formed!',
-            currentPlayer: nextPlayer,
-          }, () => {
-            // Hide the popup after 2 seconds
-            setTimeout(() => {
-              this.setState({ showPopup: false, info: `Player ${nextPlayer}'s turn to place a piece.` });
-            }, 2000);
-          });
-        } else {
-          this.setState({
-            info: `Player ${this.state.currentPlayer} formed a mill!`,
-            currentPlayer: nextPlayer,
-          }, () => {
-            this.setState({
-              info: `Player ${nextPlayer}'s turn to place a piece.`,
-            });
-          });
-        }
+ 
+// Handle the first phase of the game where players place their pieces
+handlePhaseI(node) {
+  const board = [...this.state.board];
+  board[node].controllingPlayer = this.state.currentPlayer;
+  const playerKey = this.state.currentPlayer === 1 ? 'player1Nodes' : 'player2Nodes';
+  const moveKey = this.state.currentPlayer === 1 ? 'player1Moves' : 'player2Moves';
+
+  // Always increment the move count, even if a mill is formed
+  this.setState(prevState => ({
+    board,
+    [playerKey]: prevState[playerKey] + 1,
+    [moveKey]: prevState[moveKey] + 1,
+  }), () => {
+    // Print the number of moves for each player
+    console.log(`Player 1 Moves: ${this.state.player1Moves}`);
+    console.log(`Player 2 Moves: ${this.state.player2Moves}`);
+
+    const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
+
+    // Check if a mill is formed
+    if (this.millIsFormed(node)) {
+      if (!this.state.firstMillPlayer) {
+        this.setState({
+          info: `Player ${this.state.currentPlayer} formed a mill!`,
+          firstMillPlayer: this.state.currentPlayer, // Store the first mill player
+          showPopup: true,
+          popupMessage: 'Mill formed!',
+          currentPlayer: nextPlayer,
+        }, () => {
+          // Hide the popup after 2 seconds
+          setTimeout(() => {
+            this.setState({ showPopup: false, info: `Player ${nextPlayer}'s turn to place a piece.` });
+          }, 2000);
+        });
       } else {
-        // After mill check, move to the next player's turn or Phase II
-        if (this.state.player1Moves + this.state.player2Moves >= 24) {
-          // Move to Phase II if both players have placed all 12 pieces
-          const firstMillPlayer = this.state.firstMillPlayer || nextPlayer;
+        this.setState({
+          info: `Player ${this.state.currentPlayer} formed a mill!`,
+          currentPlayer: nextPlayer,
+        }, () => {
           this.setState({
-            gamePhase: "II",
-            info: `Game Phase II: Player ${firstMillPlayer} removes an opponent's piece.`,
-            removePiece: true,
-            currentPlayer: firstMillPlayer,
-          });
-        } else {
-          this.setState({
-            currentPlayer: nextPlayer,
             info: `Player ${nextPlayer}'s turn to place a piece.`,
           });
-        }
+        });
       }
+    }
+
+    // Check if Player 2 has made 12 moves
+    if (this.state.currentPlayer === 2 && this.state.player2Moves === 12) {
+      console.log("Player 2 has made 12 moves. Moving to Phase II.");
+      const firstMillPlayer = this.state.firstMillPlayer || nextPlayer;
+      this.setState({
+        gamePhase: "II",
+        info: `Game Phase II: Player ${firstMillPlayer} removes an opponent's piece.`,
+        removePiece: true,
+        currentPlayer: firstMillPlayer,
+      });
+    } 
+    // Check if both players have made all their moves (total 24 moves)
+    else if (this.state.player1Moves + this.state.player2Moves >= 24) {
+      const firstMillPlayer = this.state.firstMillPlayer || nextPlayer;
+      this.setState({
+        gamePhase: "II",
+        info: `Game Phase II: Player ${firstMillPlayer} removes an opponent's piece.`,
+        removePiece: true,
+        currentPlayer: firstMillPlayer,
+      });
+    } else {
+      // If not transitioning to Phase II, continue to the next player's turn
+      this.setState({
+        currentPlayer: nextPlayer,
+        info: `Player ${nextPlayer}'s turn to place a piece.`,
+      });
+    }
+  });
+}
+
+// Call this function after every move to check for win
+checkForWinAfterEveryMove() {
+  const { player1Nodes, player2Nodes } = this.state;
+  if (player1Nodes < 3 || player2Nodes < 3) {
+    const winner = player1Nodes < 3 ? 2 : 1;
+    this.setState({
+      gameOver: true,
+      winner,
+      popupMessage: `Player ${winner} wins!`,
+      showPopup: true,
     });
   }
+}
 
+// Call this function in any place where a move is made to check if the game is over
+handleAfterMove(node) {
+  this.checkForWinAfterEveryMove();
+}
   // Show temporary info messages
   showTemporaryInfo(message) {
     const previousInfo = this.state.info;
@@ -372,12 +407,16 @@ class Shaxboard extends React.Component {
     this.setState({ showPopup: false, popupMessage: '' });
   }
 
- render() {
+  render() {
     const { appClassName } = this.props;
     const nodes = this.state.board.map((node, i) => {
+      // Determine if the current node is highlighted or selected
       const additionalClass = node.controllingPlayer === 0 ? 'unclicked-node' : '';
       const highlightClass = (this.state.gamePhase === "III" && node.controllingPlayer === this.state.currentPlayer && this.hasEmptyDirectionalAdjacentNode(i)) ? 'highlight' : '';
-      const selectedClass = (this.state.selectedNode === i) ? 'selected' : '';
+      const selectedClass = (this.state.selectedNode === i) ? 'selected' : ''; // Apply 'selected' class if the node is selected
+  
+      // Combine all the classes dynamically
+      const combinedClass = `${additionalClass} ${highlightClass} ${selectedClass}`.trim();
   
       return (
         <Node
@@ -386,18 +425,18 @@ class Shaxboard extends React.Component {
           controllingPlayer={node.controllingPlayer}
           position={node.position}
           nodeIsClicked={this.playerMove.bind(this)}
-          className={`${additionalClass} ${highlightClass} ${selectedClass}`}
+          className={combinedClass}  // Pass the combined class to the Node
         />
       );
     });
-
+  
     return (
       <div className={appClassName}>
-      <div style={{height: '110px'}}> <h1 style={{ fontFamily: 'Poppins, sans-serif' }} className='header_for_board text-3xl font-semibold mb-4 text-center'>{this.state.info}</h1>
-      </div>
+        <div style={{ height: '110px' }}>
+          <h1 style={{ fontFamily: 'Poppins, sans-serif' }} className='header_for_board text-3xl font-semibold mb-4 text-center'>{this.state.info}</h1>
+        </div>
         <div className="board bi-2 ">
           {nodes}
-          {/* <div className="info-div bi-3">{this.state.info}</div> */}
           <div className="quarter bi-2 quarter1" />
           <div className="quarter bi-2 quarter2" />
           <div className="quarter bi-2 quarter3" />
@@ -416,11 +455,11 @@ class Shaxboard extends React.Component {
         )}
         <div className="button-container">
           <Helmet>
-                <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet" />
+            <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet" />
           </Helmet>
           <button style={{ fontFamily: 'Roboto, sans-serif' }} onClick={this.resetGame} className="reset-button">Reset</button>
           {this.state.gamePhase === "III" && (
-            <button style={{ fontFamily: 'Roboto, sans-serif' }}  onClick={this.handleBlockedHelp} className="help-button">Help Without Jare</button>
+            <button style={{ fontFamily: 'Roboto, sans-serif' }} onClick={this.handleBlockedHelp} className="help-button">Help Without Jare</button>
           )}
         </div>
       </div>

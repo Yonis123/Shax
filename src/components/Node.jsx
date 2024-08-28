@@ -8,8 +8,8 @@ class Node extends React.Component {
   }
 
   render() {
-    const { position, controllingPlayer } = this.props;
-    
+    const { position, controllingPlayer, className } = this.props;
+
     const hitboxSize = 30; // Increase hitbox size to 40x40px
     const style = {
       left: `${position.xPos}%`,
@@ -20,6 +20,7 @@ class Node extends React.Component {
       alignItems: 'center',
       justifyContent: 'center',
       transform: 'translate(-50%, -50%)',
+      border: '0px solid black'
     };
 
     let nodeClass = '';
@@ -36,8 +37,8 @@ class Node extends React.Component {
 
     return (
       <div 
-        className="node" 
-        style={style} 
+        className={`node ${nodeClass} ${className}`} // Combine node, player, and additional classes
+        style={style}
         onClick={this.onNodeClick}
       >
         <div className={nodeClass} />

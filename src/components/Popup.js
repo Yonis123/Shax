@@ -8,9 +8,9 @@ class Popup extends React.Component {
         <div className="popup">
           <h2>{this.props.message}</h2>
           {this.props.gameOver ? (
-            <button onClick={this.props.onReset}>Reset Game</button>
+            <button style={{ fontFamily: 'Roboto, sans-serif' }} onClick={this.props.onReset}>Reset Game</button>
           ) : (
-            <button onClick={this.props.onClose}>Close</button>
+            <button style={{ fontFamily: 'Roboto, sans-serif' }} onClick={this.props.onClose}>Close</button>
           )}
         </div>
       </div>
