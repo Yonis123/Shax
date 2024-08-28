@@ -19,6 +19,11 @@ function App() {
     <div>
       <Navbar></Navbar>
       <HomeSections></HomeSections>
+      <div className='bg-[#F1F6F1]'>
+        <div className='p-8'></div>
+        <Shaxboard></Shaxboard>
+        <div className='pt-8'></div>
+      </div>
     </div>
   );
 }

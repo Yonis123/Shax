@@ -256,14 +256,17 @@ class Shaxboard extends React.Component {
     board[node].controllingPlayer = this.state.currentPlayer;
     const playerKey = this.state.currentPlayer === 1 ? 'player1Nodes' : 'player2Nodes';
     const moveKey = this.state.currentPlayer === 1 ? 'player1Moves' : 'player2Moves';
-
+    
+    // Always increment the move count
     this.setState(prevState => ({
       board,
       [playerKey]: prevState[playerKey] + 1,
       [moveKey]: prevState[moveKey] + 1,
     }), () => {
+      const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
+  
+      // Check if a mill is formed
       if (this.millIsFormed(node)) {
-        const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
         if (!this.state.firstMillPlayer) {
           this.setState({
             info: `Player ${this.state.currentPlayer} formed a mill!`,
@@ -272,13 +275,9 @@ class Shaxboard extends React.Component {
             popupMessage: 'Mill formed!',
             currentPlayer: nextPlayer,
           }, () => {
-            this.setState({
-              info: `Player ${nextPlayer}'s turn to place a piece.`,
-            });
-
             // Hide the popup after 2 seconds
             setTimeout(() => {
-              this.setState({ showPopup: false });
+              this.setState({ showPopup: false, info: `Player ${nextPlayer}'s turn to place a piece.` });
             }, 2000);
           });
         } else {
@@ -292,10 +291,10 @@ class Shaxboard extends React.Component {
           });
         }
       } else {
-        const nextPlayer = this.getNextPlayer(this.state.currentPlayer);
-        if (this.state.player2Moves >= 12) {
-          // Move to phase II if all pieces have been placed
-          const firstMillPlayer = this.state.firstMillPlayer || 2;
+        // After mill check, move to the next player's turn or Phase II
+        if (this.state.player1Moves + this.state.player2Moves >= 24) {
+          // Move to Phase II if both players have placed all 12 pieces
+          const firstMillPlayer = this.state.firstMillPlayer || nextPlayer;
           this.setState({
             gamePhase: "II",
             info: `Game Phase II: Player ${firstMillPlayer} removes an opponent's piece.`,
@@ -394,11 +393,9 @@ class Shaxboard extends React.Component {
 
     return (
       <div className={appClassName}>
-        <Helmet>
-           <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-          </Helmet>
-      <h1 className='header_for_board'>{this.state.info}</h1>
-        <div className="board bi-2">
+      <div style={{height: '110px'}}> <h1 style={{ fontFamily: 'Poppins, sans-serif' }} className='header_for_board text-3xl font-semibold mb-4 text-center'>{this.state.info}</h1>
+      </div>
+        <div className="board bi-2 ">
           {nodes}
           {/* <div className="info-div bi-3">{this.state.info}</div> */}
           <div className="quarter bi-2 quarter1" />
@@ -414,15 +411,16 @@ class Shaxboard extends React.Component {
             onClose={this.closePopup}
             onReset={this.resetGame}
             gameOver={this.state.gameOver}
+            style={{ fontFamily: 'Roboto, sans-serif' }}
           />
         )}
         <div className="button-container">
           <Helmet>
                 <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet" />
           </Helmet>
-          <button onClick={this.resetGame} className="reset-button">Reset</button>
+          <button style={{ fontFamily: 'Roboto, sans-serif' }} onClick={this.resetGame} className="reset-button">Reset</button>
           {this.state.gamePhase === "III" && (
-            <button onClick={this.handleBlockedHelp} className="help-button">Jare</button>
+            <button style={{ fontFamily: 'Roboto, sans-serif' }}  onClick={this.handleBlockedHelp} className="help-button">Help Without Jare</button>
           )}
         </div>
       </div>
