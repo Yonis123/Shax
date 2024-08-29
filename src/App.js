@@ -7,18 +7,15 @@ import HomeSections from './components/HomeSections';
 
 
 function App() {
+
+  const scrollToSection = (sectionId) => {
+    document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
-    // <Router>
-    //   <div>
-    //     <Routes>
-    //       <Route path="/" element={<HomePage/>} />
-    //       {/* <Route path="/game" element={<Shaxboard />} /> */}
-    //     </Routes>
-    //   </div>
-    // </Router>
     <div>
       <Navbar></Navbar>
-      <HomeSections></HomeSections>
+      <HomeSections ></HomeSections>
       <div className='bg-[#F1F6F1]'>
         <div className='p-8'></div>
         <Shaxboard></Shaxboard>

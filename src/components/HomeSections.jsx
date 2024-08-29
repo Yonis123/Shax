@@ -3,11 +3,17 @@ import somali_image_shax from '../assets/png/somali_image_shax.png';
 import gameBoard from '../assets/png/game_board.png';
 
 const HomeSections = () => {
+
+  const scrollToSection = (sectionId) => {
+    document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+  };
+
+
   return (
     <section className=" min-h-screen">
 
       {/* first section */}
-      <section className='bg-[#F1F6F1]'>
+      <section id='home' className='bg-[#F1F6F1]'>
         <div className="max-w-[1240px] mx-auto px-4 py-8">
           {/* Section for Desktop */}
           <div className="hidden lg:flex justify-between items-start space-x-4">
@@ -18,10 +24,12 @@ const HomeSections = () => {
                   Welcome to the Shax demo! Experience Shax, a centuries-old Somali board game, cherished for generations. In this demo, you can enjoy playing with a friend in person. Stay tuned for the upcoming online version!
                   </p>
                   <div className='flex space-x-4 justify-items-start pl-12 pt-2'>
-                    <button style={{ fontFamily: 'Roboto, sans-serif' }} className="bg-[#78c45c] text-white py-2 px-9 rounded-3xl hover:bg-[#88cc74] transition duration-300">
+                    <button 
+                    onClick={() => scrollToSection('play-now')}
+                    style={{ fontFamily: 'Roboto, sans-serif' }} className="bg-[#78c45c] text-white py-2 px-9 rounded-3xl hover:bg-[#88cc74] transition duration-300">
                       Try Demo 
                     </button>
-                    <button style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[#78c45c] py-2 px-6 transition duration-300 font-semibold">
+                    <button onClick={() => scrollToSection('instructions')} style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[#78c45c] py-2 px-6 transition duration-300 font-semibold">
                       How to Play
                     </button>
                   </div>
@@ -57,10 +65,10 @@ const HomeSections = () => {
 
             {/* Tablet Buttons */}
             <div className='flex space-x-4 justify-items-start pl-12'>
-              <button style={{ fontFamily: 'Roboto, sans-serif' }} className="bg-[#78c45c] text-white py-2 px-9 rounded-3xl hover:bg-[#88cc74] transition duration-300">
+              <button onClick={() => scrollToSection('play-now')} style={{ fontFamily: 'Roboto, sans-serif' }} className="bg-[#78c45c] text-white py-2 px-9 rounded-3xl hover:bg-[#88cc74] transition duration-300">
                 Try Demo
               </button>
-              <button style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[#78c45c] py-2 px-6 transition duration-300 font-semibold">
+              <button onClick={() => scrollToSection('instructions')} style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[#78c45c] py-2 px-6 transition duration-300 font-semibold">
                 How to Play
               </button>
             </div>
@@ -87,10 +95,10 @@ const HomeSections = () => {
 
             {/* Mobile Buttons */}
             <div className='flex space-x-4 justify-items-start pl-12'>
-              <button style={{ fontFamily: 'Roboto, sans-serif' }} className="bg-[#78c45c] text-white py-2 px-9 rounded-3xl hover:bg-[#88cc74] transition duration-300">
+              <button onClick={() => scrollToSection('play-now')} style={{ fontFamily: 'Roboto, sans-serif' }} className="bg-[#78c45c] text-white py-2 px-9 rounded-3xl hover:bg-[#88cc74] transition duration-300">
                 Try Demo 
               </button>
-              <button style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[#78c45c] py-2 px-6 transition duration-300 font-semibold">
+              <button onClick={() => scrollToSection('instructions')} style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[#78c45c] py-2 px-6 transition duration-300 font-semibold">
                 How to Play
               </button>
             </div>
@@ -105,7 +113,7 @@ const HomeSections = () => {
 
 
       {/* second section */}
-      <section>
+      <section id='instructions'>
       <div className="max-w-[1240px] mx-auto px-4 py-8">
         {/* Section for Desktop */}
         <div className="hidden lg:flex justify-between items-start space-x-4">
@@ -140,7 +148,7 @@ const HomeSections = () => {
             <button style={{ fontFamily: 'Roboto, sans-serif' }} className="bg-[#78c45c] text-white py-2 px-9 rounded-3xl hover:bg-[#88cc74] transition duration-300">
               <a href='https://mogadishuimages.wordpress.com/wp-content/uploads/2016/05/an-introduction-to-shax-a-somali-game2.pdf' > Learn More </a>
             </button>
-            <button style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[#78c45c] py-2 px-6 transition duration-300 font-semibold">
+            <button onClick={() => scrollToSection('play-now')} style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[#78c45c] py-2 px-6 transition duration-300 font-semibold">
               Try Demo Now!
             </button>
           </div>
