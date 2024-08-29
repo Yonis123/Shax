@@ -47,24 +47,32 @@ const Navbar = () => {
 
       {/* Mobile Menu: visible when 'isMenuOpen' is true */}
       <ul
-        className={`${
-          isMenuOpen ? 'absolute' : 'hidden'
-        } top-0 right-0 w-[60%] h-full bg-gray-900 text-white flex flex-col items-center justify-center`}
+        className={`fixed top-0 right-0 w-[60%] h-full bg-white text-black flex flex-col items-center justify-center transform ${
+    isMenuOpen ? 'translate-x-0 border-l-4 border-gradient-to-b from-[#78c45c] to-[#00df9a]' : 'translate-x-full'
+  } transition-transform duration-300 ease-in-out${
+
+          isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+        } transition-transform duration-300 ease-in-out`}
       >
+        {/* Exit Button */}
+        <div className='absolute top-4 right-4' onClick={toggleMenu}>
+          <FaTimes size={20} className="cursor-pointer hover:text-[#78c45c]" />
+        </div>
+
         <li
-          className='py-6 text-2xl cursor-pointer'
+          className='py-6 text-2xl cursor-pointer hover:text-[#78c45c]'
           onClick={() => scrollToSection('home')}
         >
           Home
         </li>
         <li
-          className='py-6 text-2xl cursor-pointer'
+          className='py-6 text-2xl cursor-pointer hover:text-[#78c45c]'
           onClick={() => scrollToSection('instructions')}
         >
           Instructions
         </li>
         <li
-          className='py-6 text-2xl cursor-pointer'
+          className='py-6 text-2xl cursor-pointer hover:text-[#78c45c]'
           onClick={() => scrollToSection('play-now')}
         >
           Play Now
