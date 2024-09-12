@@ -432,7 +432,7 @@ handleAfterMove(node) {
   
     return (
       <div id='play-now' className={appClassName}>
-        <div style={{ height: '110px' }}>
+        <div style={{ height: '154px' }}>
           <h1 style={{ fontFamily: 'Poppins, sans-serif' }} className='header_for_board text-3xl font-semibold mb-4 text-center'>{this.state.info}</h1>
         </div>
         <div className="board bi-2 ">
